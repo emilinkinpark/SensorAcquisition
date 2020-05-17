@@ -5,8 +5,6 @@
 #define O2_slaveID 0x0E
 #define O2_slaveID_DEC 14
 
-
-
 float DOmgl;
 float DO_Temp;
 
@@ -19,8 +17,8 @@ void DO()
   memset(incomingData, 0, sizeof(incomingData)); //Empties array
 
   // Start Measurement
-  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
-  serial_flush_buffer(3);                                            //Cleaning Response
+  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01);  //Serial2 used for Transceive Data
+  serial_flush_buffer(3);                                             //Cleaning Response
   delay(2000);
   //Serial.println("Starting Measurement");
 
@@ -31,7 +29,7 @@ void DO()
     delay(100);
   }
 
-  Serial.println("Data Acquired");
+  //Serial.println("Data Acquired");
 
   if (o2[0] != O2_slaveID_DEC) //Slave ID Check
   {
