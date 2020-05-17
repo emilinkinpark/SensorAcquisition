@@ -42,7 +42,7 @@
 // uint16_t temp_transmit = 0;
 // uint16_t DOmgl_transmit = 0;
 
-void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
+/* void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
 {
   for (;;)
   {
@@ -86,7 +86,7 @@ void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while 
     //   delay(100);
     // // TCS3200 code end
   }
-}
+} */
 
 void setup()
 {
