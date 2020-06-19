@@ -102,7 +102,7 @@ void setup()
 
   mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
 
-  bmeInit(); // Initialising BME680 Dependencies
+  //bmeInit(); // Initialising BME680 Dependencies
   // // TCS3200 Color Sensor Setup
   // // Setting the outputs
   // pinMode(S0, OUTPUT);
@@ -124,7 +124,7 @@ void loop() // All Modbus Operation
 
   mqttloop(); //MQTT Start
 
-  bmeRun(); //BME680 reading
+  //bmeRun(); //BME680 reading
   //DO();       //Measuring Dissolved Oxygen
 
   //Serial.println(millis()-now);   //Shows time to complete a full cycle in milli seconds

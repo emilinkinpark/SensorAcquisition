@@ -1,0 +1,7 @@
+19/06/2020:
+
+variables.h is created
+        tank address now needs to be only changed
+        TOPIC will automatically be changed
+
+new publish function is created to make publishing easier
