@@ -7,7 +7,7 @@
 *   Acknowledgement: The project uses a lot of free libraries from different contributors. An special thanks to all hard working software people. 
 *                    Specific acknowledgement is made into the seperate files in the include folder.
 *    
-*   The purpose of this project is to create a decentralised or independent controller for Glory Agro Project Ltd's Intensive Prawn Farming Project. 
+*   The purpose of this project is to create a decentralised or independent controller for Habib Aquaculture Ptv. Ltd (Proposed) Bangladesh Intensive Prawn Farming Project. 
 *   The field slave devices talks back to ESP32 (Master) over RS485 Modbus.
 *   The data is taken in and send to Raspberrypi MQTT server over Wifi
 *   
