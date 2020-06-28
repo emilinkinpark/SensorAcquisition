@@ -100,7 +100,7 @@ void setup()
 
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
-  mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
+  //mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
 
   //bmeInit(); // Initialising BME680 Dependencies
   // // TCS3200 Color Sensor Setup
@@ -117,15 +117,18 @@ void setup()
   // digitalWrite(S0,HIGH);
   // digitalWrite(S1,LOW);
   // // TCS3200 Sensor Setup end
+
+
 }
 
 void loop() // All Modbus Operation
 {
 
-  mqttloop(); //MQTT Start
+  //mqttloop(); //MQTT Start
 
   //bmeRun(); //BME680 reading
   //DO();       //Measuring Dissolved Oxygen
+  pH();       //Measuring pH
 
   //Serial.println(millis()-now);   //Shows time to complete a full cycle in milli seconds
 }
