@@ -165,11 +165,18 @@ void mqttloop()           // This part needs to be in loop
     lastMsg = now;
     heartbeat = 1;  //Heartbeat publishes 1 to mark start of transmission
 
-    publish(heartbeat,"HEART",HEARTBEAT_TOPIC);
+    publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
+    publish(do_heart,"DO",HEARTBEAT_TOPIC);
+    publish(ph_heart,"pH",pH_TOPIC);
 
-    publish(random(1,5),"TEST",DO_TOPIC);
+    publish(DOmgl,"DO",DO_TOPIC);
+    publish(DO_Temp,"Temperature",DO_TOPIC);
 
-    publish(random(5,10),"TEST",pH_TOPIC);
+    publish(ORP,"ORP",pH_TOPIC);
+    publish(ph_val,"pH",pH_TOPIC);
+    publish(ph_temperature,"Temperature",pH_TOPIC);
+    publish(resitance,"Resistance",pH_TOPIC);
+    
 
 
     heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission

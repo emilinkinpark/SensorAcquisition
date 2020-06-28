@@ -5,3 +5,7 @@ variables.h is created
         TOPIC will automatically be changed
 
 new publish function is created to make publishing easier
+
+28/06/2020:
+
+pH function with necessary conversion added to the code.

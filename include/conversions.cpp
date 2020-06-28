@@ -61,11 +61,32 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     return DOmgL;
 }
 
-uint16_t dec_hex16(uint16_t temp_value)
+uint16_t dec16_hex8(uint16_t byte1)
 {
     uint8_t temp_arr[2];
-    temp_arr[0] = (temp_value >> 8);   //Higher Bits
-    temp_arr[1] = (temp_value & 0xFF); //Lower Bits
+    temp_arr[0] = (byte1 >> 8);   //Higher Bits
+    temp_arr[1] = (byte1 & 0xFF); //Lower Bits
 
     return (temp_arr[0] << 8 |temp_arr[1]);
+}
+
+int16_t hex16_signedint(uint8_t byte1, uint8_t byte2)          // Converts two 8 bits HEX into a single signed integer
+{
+    uint8_t sign_check = byte1 >> 7;
+
+    if (sign_check == 1)
+    {
+        uint8_t compliment_1 = ~(byte1);
+
+        uint8_t  compliment_2 = ~(byte2)+1;  //2's compliment
+
+        int16_t compliment = -1*((compliment_1<<8)|compliment_2);
+
+        return (compliment);
+        
+    }
+    else
+    {
+        return(byte1<<8|byte2);
+    }
 }
