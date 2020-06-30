@@ -22,26 +22,9 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-// TCS3200 Color Sensor
-
-// TCS230 or TCS3200 pins wiring to Arduino
-// #define S0 32
-// #define S1 33
-// #define S2 25
-// #define S3 26
-// #define sensorOut 35
-
-// Stores frequency read by the photodiodes
-// int redFrequency = 0;
-// int greenFrequency = 0;
-// int blueFrequency = 0;
-
-// Global Variables for Temperature and DO mg/L for Optical DO Sensor
-// uint16_t Temp_Send = 0;
-// uint16_t DOmgl_Send = 0;
-// uint16_t temp_transmit = 0;
-// uint16_t DOmgl_transmit = 0;
-
+/* long Starttime = 0;
+long elapsedtime = 0;
+ */
 /* void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
 {
   for (;;)
@@ -92,15 +75,15 @@ void setup()
 {
 
   //xTaskCreatePinnedToCore(Core0code, "Task0", 10000, NULL, 1, NULL, 0);   // Handle to access core 0, ill advised to use while using WiFi or BLE
-
+  
   Serial.begin(9600); //TXD0 - used as serial decorder
-
+  /* Starttime = millis(); */
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
   //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
 
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
-  //mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
+  mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
 
   //bmeInit(); // Initialising BME680 Dependencies
   // // TCS3200 Color Sensor Setup
@@ -124,11 +107,20 @@ void setup()
 void loop() // All Modbus Operation
 {
 
-  //mqttloop(); //MQTT Start
+  mqttloop(); //MQTT Start
 
   //bmeRun(); //BME680 reading
-  //DO();       //Measuring Dissolved Oxygen
+  DO();       //Measuring Dissolved Oxygen
+  /* Serial.print("DO: "); Serial.println(DOmgl);
+  Serial.print("DO_Temp: "); Serial.println(DO_Temp); */
   pH();       //Measuring pH
+  /* Serial.print("pH: "); Serial.println(ph_val);
+  Serial.print("pH_Temp: "); Serial.println(ph_temperature);
+  Serial.print("ORP: "); Serial.println(ORP);
+  Serial.print("Res: "); Serial.println(resitance); */
 
   //Serial.println(millis()-now);   //Shows time to complete a full cycle in milli seconds
+  delay(100);
+  /* elapsedtime = millis()-Starttime;
+  Serial.println("Elapsed_Time: "); Serial.print(elapsedtime); */
 }

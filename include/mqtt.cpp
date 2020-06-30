@@ -21,7 +21,7 @@ void setup_wifi(char *ssid, char *pass)
   //Serial.println();
   //Serial.print("Connecting to ");
   //Serial.println(ssid);
-
+  WiFi.setHostname(tank_addr);
   WiFi.begin(ssid, pass);
 
   while (WiFi.status() != WL_CONNECTED)
@@ -73,9 +73,9 @@ void mqtt_init()
   client.setCallback(callback);
   
   //MQTT TOPIC Dependants
-  strcat(HEARTBEAT_TOPIC,tank_addr); strcat(HEARTBEAT_TOPIC,"/DATA/HEART");    //"TANK_1/DATA/HEART"    17 characters
-  strcat(DO_TOPIC,tank_addr); strcat(DO_TOPIC,"/DATA/LT105A");                 //"TANK_1/DATA/LT105A"  20 characters
-  strcat(pH_TOPIC,tank_addr); strcat(pH_TOPIC,"/DATA/LT1729D");                //"TANK_1/DATA/LT1729D"  20 characters
+  strcat(HEARTBEAT_TOPIC,tank_addr); strcat(HEARTBEAT_TOPIC,"/DATA/HEART");    //TANK_x/DATA/HEART    17 characters
+  strcat(DO_TOPIC,tank_addr); strcat(DO_TOPIC,"/DATA/LT105A");                 //TANK_x/DATA/LT105A  20 characters
+  strcat(pH_TOPIC,tank_addr); strcat(pH_TOPIC,"/DATA/LT1729D");                //TANK_x/DATA/LT1729D  20 characters
 
 }
 
@@ -167,7 +167,7 @@ void mqttloop()           // This part needs to be in loop
 
     publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
     publish(do_heart,"DO",HEARTBEAT_TOPIC);
-    publish(ph_heart,"pH",pH_TOPIC);
+    publish(ph_heart,"pH",HEARTBEAT_TOPIC);
 
     publish(DOmgl,"DO",DO_TOPIC);
     publish(DO_Temp,"Temperature",DO_TOPIC);
@@ -181,7 +181,7 @@ void mqttloop()           // This part needs to be in loop
 
     heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
 
-    publish(heartbeat,"HEART",HEARTBEAT_TOPIC);
+    publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
 
 
   }
