@@ -62,7 +62,7 @@ void DO()
   }
   if(isnan(DOmgl) != 0) // Check if DO Sensor Fails
   {
-    do_heart = 0;
+    do_heart = 0;   //Sends out when DO Sensor Fails
   }        
   
 
@@ -96,7 +96,7 @@ void pH()
   }
   else
   {
-    ORP = hex16_signedint(ph_temp[3], ph_temp[4]) / 10.00;
+    //ORP = hex16_signedint(ph_temp[3], ph_temp[4]) / 10.00;
     ph_val = hex16_signedint(ph_temp[5], ph_temp[6]) / 100.00;
     ph_temperature = hex16_signedint(ph_temp[7], ph_temp[8]) / 10.00;
     resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
