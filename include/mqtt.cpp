@@ -172,7 +172,7 @@ void mqttloop()           // This part needs to be in loop
     publish(DOmgl,"DO",DO_TOPIC);
     publish(DO_Temp,"Temperature",DO_TOPIC);
 
-    publish(ORP,"ORP",pH_TOPIC);
+    //publish(ORP,"ORP",pH_TOPIC);
     publish(ph_val,"pH",pH_TOPIC);
     publish(ph_temperature,"Temperature",pH_TOPIC);
     publish(resitance,"Resistance",pH_TOPIC);
