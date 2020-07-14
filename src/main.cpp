@@ -13,8 +13,9 @@
 *   
 */
 
-#include "mqtt.cpp"
-
+//#include "mqtt.cpp"
+#include "esp_system.h"
+#include "DOpH.cpp"
 //Serial Pins Definition
 
 #define UART1_RX 4
@@ -22,8 +23,9 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-long Starttime = 0;
-long elapsedtime = 0;
+long longtime=0;
+
+hw_timer_t *watchdogTimer = NULL;
 
 /* void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
 {
@@ -71,12 +73,20 @@ long elapsedtime = 0;
   }
 } */
 
+void IRAM_ATTR resetModule() //Resets on Watchdog
+{
+  //Serial.println("Resetting");
+  ets_printf("reboot\n");
+  esp_restart();
+}
+
 void setup()
 {
 
   //xTaskCreatePinnedToCore(Core0code, "Task0", 10000, NULL, 1, NULL, 0);   // Handle to access core 0, ill advised to use while using WiFi or BLE
 
   Serial.begin(9600); //TXD0 - used as serial decorder
+
   /* Serial.println("Setup Time");
   Serial.println(millis()); */
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
@@ -84,24 +94,35 @@ void setup()
 
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
+  watchdogTimer = timerBegin(0, 80, true); //timer 0, div 80
+  timerAttachInterrupt(watchdogTimer, &resetModule, true);
+  timerAlarmWrite(watchdogTimer, 35000000, false); // Watchdog Time set in us; Default 35 seconds
+  timerAlarmEnable(watchdogTimer);                 //enable interrupt
+
   mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
-  
+
   //bmeInit(); // Initialising BME680 Dependencies
- 
 }
 
 void loop() // All Modbus Operation
 {
-  Serial.println("Loop Starting");
-  Serial.println(millis());
+  //longtime = millis();
+  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
   mqttloop(); //MQTT Start
+  
+  
+  heartbeat = 1;  //Heartbeat = 1 marks the start of loop
+  publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
 
+  
   //bmeRun(); //BME680 reading
   DO(); //Measuring Dissolved Oxygen
 
   pH(); //Measuring pH
-
-  //delay(100);
-  /* Serial.println("End of Loop");
-  Serial.println(millis()); */
+  
+  heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
+  publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
+  delay(4800);
+  // longtime = millis() - longtime;
+  // Serial.println(longtime);
 }
