@@ -6,8 +6,8 @@ Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqt
 #include <WiFiClient.cpp>
 #include <PubSubClient.h>
 #include "variables.h"
-byte i = 0;
-boolean heartbeat = 0; // Heartbeat of the device
+
+boolean heartbeat = 0;                  // Heartbeat of ESP32
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -118,7 +118,6 @@ void reconnect()
       Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 30 seconds"); // Wait 5 seconds before retrying
       delay(30000);
       setup_wifi(SSID,PASS);                                 //Re-initialises WiFi
-      //mqtt_init();                                        // Re-initialises WiFi and MQTT
     }
   }  
 }
@@ -156,7 +155,6 @@ void mqttloop()           // This part needs to be in loop
   }
   client.loop();
 
-  //Serial.println(now-lastMsg);
 
   if (now - lastMsg > 5000)
   {
@@ -174,14 +172,11 @@ void mqttloop()           // This part needs to be in loop
     publish(ph_val,"pH",pH_TOPIC);
     publish(ph_temperature,"Temperature",pH_TOPIC);
     //publish(resitance,"Resistance",pH_TOPIC);
-    Serial.print("Count: "); Serial.println(i);
-    Serial.print("DO: "); Serial.println(DOmgl); Serial.print("DO_Temp: "); Serial.println(DO_Temp);
-    Serial.print("pH: "); Serial.println(ph_val); Serial.print("pH_Temp: "); Serial.println(ph_temperature);
 
     heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
 
     publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
-    i++;
+    
 
   }
   //MQTT End
