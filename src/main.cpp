@@ -9,7 +9,7 @@
 *    
 *   The purpose of this project is to create a decentralised or independent controller for Habib Aquaculture Ptv. Ltd (Proposed) Bangladesh Intensive Prawn Farming Project. 
 *   The field slave devices talks back to ESP32 (Master) over RS485 Modbus.
-*   The data is taken in and send to Raspberrypi MQTT server over Wifi
+*   The data is taken in and send to MQTT Broker over Wifi
 *   
 */
 
