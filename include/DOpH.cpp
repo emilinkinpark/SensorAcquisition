@@ -1,5 +1,6 @@
 #include "modbus.cpp"
 #include "conversions.cpp"
+#include "mqtt.cpp"
 
 // DO sensor ID
 #define O2_slaveID 0x0E
@@ -10,8 +11,8 @@
 
 // DO variables
 boolean do_heart = 0;
-float DOmgl;
-float DO_Temp;
+float DOmgl = 0.00;
+float DO_Temp = 0.00;
 
 // pH variables
 boolean ph_heart = 0;
@@ -71,6 +72,12 @@ void DO()
   // Stop Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
   serial_flush_buffer(3); //Cleaning Response
+  
+  delay(500);
+  publish(do_heart,"DO",HEARTBEAT_TOPIC);
+  publish(DOmgl,"DO",DO_TOPIC);             // Sends DOmg/L Data to Broker
+  publish(DO_Temp,"Temperature",DO_TOPIC);  // Sends DOmg/L Data to Broker
+  
   //delay(100);
   //  Serial.println("Stop Measurement");
 }
@@ -105,4 +112,9 @@ void pH()
     ph_heart = 1;
   }
     serial_flush_buffer(3); //Cleaning Response
+    
+    delay(500);
+    publish(ph_heart,"pH",HEARTBEAT_TOPIC);
+    publish(ph_val,"pH",pH_TOPIC);
+    publish(ph_temperature,"Temperature",pH_TOPIC);
 }

@@ -103,7 +103,7 @@ void reconnect()
   // Loop until we're reconnected
   while (!client.connected())
   {
-    delay(10000);
+    //delay(10000);
 
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
@@ -115,9 +115,9 @@ void reconnect()
     }
     else
     {
-      Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 30 seconds"); // Wait 5 seconds before retrying
-      delay(30000);
-      setup_wifi(SSID,PASS);                                 //Re-initialises WiFi
+      Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 5 seconds"); // Wait 5 seconds before retrying
+      delay(5000);
+      //setup_wifi(SSID,PASS);                                 //Re-initialises WiFi
     }
   }  
 }
@@ -159,25 +159,23 @@ void mqttloop()           // This part needs to be in loop
   if (now - lastMsg > 5000)
   {
     lastMsg = now;
-    heartbeat = 1;  //Heartbeat publishes 1 to mark start of transmission
-
-    publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
-    publish(do_heart,"DO",HEARTBEAT_TOPIC);
-    publish(ph_heart,"pH",HEARTBEAT_TOPIC);
-
-    publish(DOmgl,"DO",DO_TOPIC);
-    publish(DO_Temp,"Temperature",DO_TOPIC);
-
-    //publish(ORP,"ORP",pH_TOPIC);
-    publish(ph_val,"pH",pH_TOPIC);
-    publish(ph_temperature,"Temperature",pH_TOPIC);
-    //publish(resitance,"Resistance",pH_TOPIC);
-
-    heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
-
-    publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
+    
     
 
+    
+    
+
+    /* publish(DOmgl,"DO",DO_TOPIC);
+    publish(DO_Temp,"Temperature",DO_TOPIC); */
+
+    //publish(ORP,"ORP",pH_TOPIC);
+    
+    //publish(resitance,"Resistance",pH_TOPIC);
+
+    /* Serial.print("DO: "); Serial.println(DOmgl);
+    Serial.print("pH: "); Serial.println(ph_val); */
+
+    
   }
   //MQTT End
 }

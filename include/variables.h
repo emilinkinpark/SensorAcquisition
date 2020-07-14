@@ -1,5 +1,5 @@
 //Insert all sensor header here.
-#include "DOpH.cpp"
+//#include "DOpH.cpp"
 //#include "bme680.cpp"
 
 //Topic Declaration
@@ -15,5 +15,5 @@ char pH_TOPIC[20];
 
 //MQTT
 //#define Client_Name "TANK1"
-#define MQTT_Broker_IP "192.168.0.29" //<- Raspberry Server        //"192.168.1.9" <- GloryOffice
+#define MQTT_Broker_IP "192.168.0.4" //<- AgroPC Broker//"192.168.0.29" //<- Raspberry Broker        //"192.168.1.9" <- GloryOffice
 #define MQTT_Fallback_IP "0.0.0.0"    //Implementation Required
