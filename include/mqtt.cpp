@@ -2,11 +2,12 @@
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
-#include <WiFi.h>
+//#include <WiFi.h>
+#include <WiFiClient.cpp>
 #include <PubSubClient.h>
 #include "variables.h"
-
-
+byte i = 0;
+boolean heartbeat = 0; // Heartbeat of the device
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -16,14 +17,11 @@ char msg[50];
 
 void setup_wifi(char *ssid, char *pass)
 {
-  delay(10);
-  // We start by connecting to a WiFi network
-  //Serial.println();
-  //Serial.print("Connecting to ");
-  //Serial.println(ssid);
+  delay(100);
   WiFi.setHostname(tank_addr);
+  WiFi.mode(WIFI_STA);   //WiFi Station Mode
   WiFi.begin(ssid, pass);
-
+  
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
@@ -76,7 +74,6 @@ void mqtt_init()
   strcat(HEARTBEAT_TOPIC,tank_addr); strcat(HEARTBEAT_TOPIC,"/DATA/HEART");    //TANK_x/DATA/HEART    17 characters
   strcat(DO_TOPIC,tank_addr); strcat(DO_TOPIC,"/DATA/LT105A");                 //TANK_x/DATA/LT105A  20 characters
   strcat(pH_TOPIC,tank_addr); strcat(pH_TOPIC,"/DATA/LT1729D");                //TANK_x/DATA/LT1729D  20 characters
-
 }
 
 
@@ -118,9 +115,10 @@ void reconnect()
     }
     else
     {
-      Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 5 seconds"); // Wait 5 seconds before retrying
-      delay(5000);
-      mqtt_init();                                        // Re-initialises WiFi and MQTT
+      Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 30 seconds"); // Wait 5 seconds before retrying
+      delay(30000);
+      setup_wifi(SSID,PASS);                                 //Re-initialises WiFi
+      //mqtt_init();                                        // Re-initialises WiFi and MQTT
     }
   }  
 }
@@ -147,18 +145,18 @@ char publish(float var, const char * tag, const char * publish_topic)
 
 void mqttloop()           // This part needs to be in loop
 {
-  boolean heartbeat = 0; // Heartbeat of the device
-
-  
-
 
   long now = millis();   //MQTT dependant
+  
+
 
   if (!client.connected())
   { //Reconnect if network fails
     reconnect();
   }
   client.loop();
+
+  //Serial.println(now-lastMsg);
 
   if (now - lastMsg > 5000)
   {
@@ -175,14 +173,15 @@ void mqttloop()           // This part needs to be in loop
     //publish(ORP,"ORP",pH_TOPIC);
     publish(ph_val,"pH",pH_TOPIC);
     publish(ph_temperature,"Temperature",pH_TOPIC);
-    publish(resitance,"Resistance",pH_TOPIC);
-    
-
+    //publish(resitance,"Resistance",pH_TOPIC);
+    Serial.print("Count: "); Serial.println(i);
+    Serial.print("DO: "); Serial.println(DOmgl); Serial.print("DO_Temp: "); Serial.println(DO_Temp);
+    Serial.print("pH: "); Serial.println(ph_val); Serial.print("pH_Temp: "); Serial.println(ph_temperature);
 
     heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
 
     publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
-
+    i++;
 
   }
   //MQTT End

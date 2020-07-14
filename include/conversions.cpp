@@ -33,9 +33,9 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     float T = 273.15 + t; //Temperature in Kelvin
 
     /*Constants*/
-    float const S = 11.00;                       //10.0;         //Salinity Taken 10 as constant
+    float const S = 11.00;                       //11.0;         //Salinity Taken 10 as constant
     float const atm_pressure = 101.325;          //Atmospheric Pressure in kPa
-    float const pressure = 15.07 + atm_pressure; //pressure in kPa; const pressure in salt water at 1.50m depth; more at https://bluerobotics.com/learn/pressure-depth-calculator/
+    float const pressure = 16.06 + atm_pressure; //pressure in kPa; const pressure in salt water at 1.60m depth; more at https://bluerobotics.com/learn/pressure-depth-calculator/
     float const A1 = -173.4292;
     float const A2 = 249.6339;
     float const A3 = 143.3483;

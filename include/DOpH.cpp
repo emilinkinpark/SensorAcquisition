@@ -15,10 +15,10 @@ float DO_Temp;
 
 // pH variables
 boolean ph_heart = 0;
-float ORP;            //Div by 10
+//float ORP;            //Div by 10
 float ph_val;         //Div by 100
 float ph_temperature; // Div by 10
-int resitance;        // Div by 1
+//int resitance;        // Div by 1
 
 void DO()
 {
@@ -35,19 +35,20 @@ void DO()
   //Serial.println("Starting Measurement");
 
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04);
-  for (int i = 0; i <= 5; i++)
+ 
+ for (int i = 0; i <= 5; i++)
   {
     modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
     delay(100);
   }
+
 
   //Serial.println("Data Acquired");
 
   if (o2[0] != O2_slaveID_DEC) //Slave ID Check
   {
     // Serial.println("Slave ID not matched Transmission Halt!");
-    //Serial.println(o2[0], HEX);
-   
+    Serial.println(o2[0], HEX);
   }
   else
   {
@@ -60,11 +61,12 @@ void DO()
 
     do_heart = 1;
   }
-  if(isnan(DOmgl) != 0) // Check if DO Sensor Fails
+  if (isnan(DOmgl) != 0) // Check if DO Sensor Fails
   {
-    do_heart = 0;   //Sends out when DO Sensor Fails
-  }        
-  
+    do_heart = 0; //Sends out when DO Sensor Fails
+    
+    Serial.println("DO Sensor Failed");
+  }
 
   // Stop Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
@@ -81,10 +83,10 @@ void pH()
   ph_heart = 0;
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
-  
+
   for (byte i = 1; i <= 5; i++)
   {
-    modbusRead(3, pH_slaveID_DEC, 13, ph_temp);                      //Acquiring Data and saving into ph_temp
+    modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
     delay(100);
   }
   if (ph_temp[0] != pH_slaveID_DEC) //Slave ID Check
@@ -99,8 +101,8 @@ void pH()
     //ORP = hex16_signedint(ph_temp[3], ph_temp[4]) / 10.00;
     ph_val = hex16_signedint(ph_temp[5], ph_temp[6]) / 100.00;
     ph_temperature = hex16_signedint(ph_temp[7], ph_temp[8]) / 10.00;
-    resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
+    //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
+    ph_heart = 1;
   }
-  ph_heart = 1;
-  serial_flush_buffer(3);
+    serial_flush_buffer(3); //Cleaning Response
 }

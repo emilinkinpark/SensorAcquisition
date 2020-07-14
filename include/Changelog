@@ -1,3 +1,11 @@
+13/07/2020:
+mqtt.cpp:
+        <- WiFi.h removed
+                -> WiFiClient.cpp in
+        Under Reconnect() function:
+                -> New WiFi reconnect function added.
+        
+
 19/06/2020:
 
 variables.h is created
