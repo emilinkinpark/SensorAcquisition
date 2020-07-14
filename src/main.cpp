@@ -22,9 +22,9 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-/* long Starttime = 0;
+long Starttime = 0;
 long elapsedtime = 0;
- */
+
 /* void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
 {
   for (;;)
@@ -75,52 +75,33 @@ void setup()
 {
 
   //xTaskCreatePinnedToCore(Core0code, "Task0", 10000, NULL, 1, NULL, 0);   // Handle to access core 0, ill advised to use while using WiFi or BLE
-  
+
   Serial.begin(9600); //TXD0 - used as serial decorder
-  /* Starttime = millis(); */
+  /* Serial.println("Setup Time");
+  Serial.println(millis()); */
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
   //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
 
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
   mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
-
+  
   //bmeInit(); // Initialising BME680 Dependencies
-  // // TCS3200 Color Sensor Setup
-  // // Setting the outputs
-  // pinMode(S0, OUTPUT);
-  // pinMode(S1, OUTPUT);
-  // pinMode(S2, OUTPUT);
-  // pinMode(S3, OUTPUT);
-
-  // // Setting the sensorOut as an input
-  // pinMode(sensorOut, INPUT);
-
-  // // Setting frequency scaling to 20%
-  // digitalWrite(S0,HIGH);
-  // digitalWrite(S1,LOW);
-  // // TCS3200 Sensor Setup end
-
-
+ 
 }
 
 void loop() // All Modbus Operation
 {
-
+  Serial.println("Loop Starting");
+  Serial.println(millis());
   mqttloop(); //MQTT Start
 
   //bmeRun(); //BME680 reading
-  DO();       //Measuring Dissolved Oxygen
-  /* Serial.print("DO: "); Serial.println(DOmgl);
-  Serial.print("DO_Temp: "); Serial.println(DO_Temp); */
-  pH();       //Measuring pH
-  /* Serial.print("pH: "); Serial.println(ph_val);
-  Serial.print("pH_Temp: "); Serial.println(ph_temperature);
-  Serial.print("ORP: "); Serial.println(ORP);
-  Serial.print("Res: "); Serial.println(resitance); */
+  DO(); //Measuring Dissolved Oxygen
 
-  //Serial.println(millis()-now);   //Shows time to complete a full cycle in milli seconds
-  delay(100);
-  /* elapsedtime = millis()-Starttime;
-  Serial.println("Elapsed_Time: "); Serial.print(elapsedtime); */
+  pH(); //Measuring pH
+
+  //delay(100);
+  /* Serial.println("End of Loop");
+  Serial.println(millis()); */
 }
