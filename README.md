@@ -3,7 +3,7 @@
 The codes are licensed under GNU LESSER GENERAL PUBLIC LICENSE
 *   Copyright © 2007 Free Software Foundation, Inc. <https://fsf.org/>
 *   More on the license at <https://www.gnu.org/licenses/lgpl-3.0.en.html>
-*   Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
+*   Everyone is permitted to copy and distribute verbatim copies of this license document, but changing, is not allowed.
 *   
 *   Rouf Aquaculture Pvt.Ltd (Proposed) Bangladesh has complete rights to this firmware.
 *
