@@ -123,7 +123,7 @@ void reconnect()
 }
 
 
-char publish(float var, const char * tag, const char * publish_topic)
+void publish(float var, const char * tag, const char * publish_topic)
 {
    char str[50];
    char temp[8];
