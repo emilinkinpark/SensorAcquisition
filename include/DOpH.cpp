@@ -1,3 +1,7 @@
+/*  Smoothed by Matthew Fryer
+*/
+
+
 #include "modbus.cpp"
 #include "conversions.cpp"
 #include "mqtt.cpp"

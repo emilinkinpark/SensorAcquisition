@@ -1,4 +1,5 @@
 /*
+  Library Used: PubSubClient.h by knolleary 
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
@@ -84,7 +85,7 @@ float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Da
   const char *temp = SubscribedData.c_str();
   /* Serial.println(temp);                 //Debugging */
 
-  if (char *ret = strstr(temp, "\"DO\":"))
+  if (strstr(temp, "\"DO\":"))
   {
     float val = atof(&SubscribedData[6]); //Converts String to float
                                           /*  Serial.print("Float is: ");           // Debugging
@@ -159,12 +160,6 @@ void mqttloop()           // This part needs to be in loop
   if (now - lastMsg > 5000)
   {
     lastMsg = now;
-    
-    
-
-    
-    
-
     /* publish(DOmgl,"DO",DO_TOPIC);
     publish(DO_Temp,"Temperature",DO_TOPIC); */
 
@@ -174,8 +169,6 @@ void mqttloop()           // This part needs to be in loop
 
     /* Serial.print("DO: "); Serial.println(DOmgl);
     Serial.print("pH: "); Serial.println(ph_val); */
-
-    
   }
   //MQTT End
 }
