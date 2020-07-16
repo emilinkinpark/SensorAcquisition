@@ -1,7 +1,6 @@
 /*  Smoothed by Matthew Fryer
 */
 
-
 #include "modbus.cpp"
 #include "conversions.cpp"
 #include "mqtt.cpp"
@@ -46,11 +45,11 @@ void DO()
                                                         Send Data to MQTT Broker
 */
   int o2[13]; //O2 buffer length must have a size of 12 bytes
-  
+
   memset(o2, 0, sizeof(o2)); //Empties array
   float averagedomgl = 0.00;
   byte DOfaultstatus = 0;
-  
+
   // Start Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
   serial_flush_buffer(3);                                            //Cleaning Response
@@ -95,12 +94,16 @@ void DO()
         DOfaultstatus = 0;       // DOfaultstatus reset
       }
     }
-    if (DOfaultstatus >= 15)
+    if (DOfaultstatus >= 15)            // If Sensor does not respond 15 times then, publish error and break;
     {
       do_heart = 0;                     //Sends out when DO Sensor Fails
       ets_printf("DO Sensor Failed\n"); // Reports error
       publish(do_heart, "DO", HEARTBEAT_TOPIC);
       break;
+    }
+    else
+    {
+      do_heart = 1;
     }
   }
 
@@ -110,13 +113,15 @@ void DO()
   //delay(100);
   //  Serial.println("Stop Measurement");
 
-  averagedomgl = AverageDOmgl.get();        // Stores the average value
+  averagedomgl = AverageDOmgl.get(); // Stores the average value
+
   publish(do_heart, "DO", HEARTBEAT_TOPIC);
   publish(averagedomgl, "DO", DO_TOPIC); // Sends DOmg/L Data to Broker
+
   //publish(DOmgl, "DO", DO_TOPIC);             // Sends DOmg/L Data to Broker
   publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
-  AverageDOmgl.clear();                     // Clears Average data
+  AverageDOmgl.clear(); // Clears Average data
 }
 
 void pH()

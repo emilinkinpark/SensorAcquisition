@@ -100,7 +100,8 @@ boolean reconnect()
   if (client.connect(tank_addr))
   {
     // Once connected, publish an announcement...
-    client.publish("Status", "Connected");
+    //client.publish(tank_addr, "Connected");
+    Serial.println("MQTT Broker Connected");
     // ... and resubscribe
     //client.subscribe("inTopic");
   }
