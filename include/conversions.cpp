@@ -61,7 +61,7 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     return DOmgL;
 }
 
-uint16_t dec16_hex8(uint16_t byte1)
+uint16_t dec16_hex8(uint16_t byte1)                             // Converts 16 bit decimal to 8bit hex
 {
     uint8_t temp_arr[2];
     temp_arr[0] = (byte1 >> 8);   //Higher Bits

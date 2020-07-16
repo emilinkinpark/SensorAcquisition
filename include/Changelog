@@ -1,3 +1,16 @@
+15/07/2020:
+DOpH.cpp:        
+        DO():
+        -> Flow Chart added
+        -> Averaging DOmg/L and DOfault status added;
+        -> Error Correction added;
+mqtt.cpp:
+        wifi_setup removed;
+        wifi initialisation included in mqtt_init();
+        reconnect() made easier;
+
+
+
 13/07/2020:
 mqtt.cpp:
         <- WiFi.h removed

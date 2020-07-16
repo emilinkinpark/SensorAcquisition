@@ -13,10 +13,8 @@
 *   
 */
 
-
 #include "esp_system.h"
 #include "DOpH.cpp"
-
 
 
 //Serial Pins Definition
@@ -26,7 +24,7 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-long longtime=0;
+long longtime = 0;
 
 hw_timer_t *watchdogTimer = NULL;
 
@@ -104,27 +102,28 @@ void setup()
 
   mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
 
+  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
   //bmeInit(); // Initialising BME680 Dependencies
 }
 
 void loop() // All Modbus Operation
 {
+  //xPortGetCoreID();          //Find out which core is running
   //longtime = millis();
-  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
-  mqttloop(); //MQTT Start
-  
-  
-  heartbeat = 1;  //Heartbeat = 1 marks the start of loop
-  publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
 
-  
+  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
+  mqttloop();                   //MQTT Start
+
+  heartbeat = 1; //Heartbeat = 1 marks the start of loop
+  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
+
   //bmeRun(); //BME680 reading
   DO(); //Measuring Dissolved Oxygen
 
   pH(); //Measuring pH
-  
-  heartbeat = 0;  //Heartbeat publishes 0 to mark end of transmission
-  publish(heartbeat,"ESP32",HEARTBEAT_TOPIC);
+
+  heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
+  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
   delay(4800);
   // longtime = millis() - longtime;
   // Serial.println(longtime);

@@ -2,8 +2,8 @@
 //#include "DOpH.cpp"
 //#include "bme680.cpp"
 
-//Topic Declaration
-char tank_addr[8] = "TANK_3"; //Insert TANK Address
+//Topic Declaration12
+char tank_addr[8] = "TANK_X"; //Insert TANK Address
 
 char HEARTBEAT_TOPIC[18];
 char DO_TOPIC[20];

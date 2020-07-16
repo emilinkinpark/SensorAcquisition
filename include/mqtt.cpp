@@ -1,36 +1,18 @@
 /*
+  Library Used: PubSubClient.h by knolleary 
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
-//#include <WiFi.h>
+
 #include <WiFiClient.cpp>
 #include <PubSubClient.h>
 #include "variables.h"
 
-boolean heartbeat = 0;                  // Heartbeat of ESP32
+boolean heartbeat = 0; // Heartbeat of ESP32
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
-char msg[50];
-
-
-void setup_wifi(char *ssid, char *pass)
-{
-  delay(100);
-  WiFi.setHostname(tank_addr);
-  WiFi.mode(WIFI_STA);   //WiFi Station Mode
-  WiFi.begin(ssid, pass);
-  
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    //Serial.print(".");
-  }
-
-  // Serial.println("");
-    Serial.println("WiFi connected"); Serial.println("IP address: "); Serial.println(WiFi.localIP());
-}
+long lastReconnectAttempt = 0;
 
 
 void callback(char *topic, byte *message, unsigned int length)
@@ -63,20 +45,36 @@ void callback(char *topic, byte *message, unsigned int length)
   } */
 }
 
-
 void mqtt_init()
 {
-  setup_wifi(SSID,PASS);
-  client.setServer(MQTT_Broker_IP, 1883);
-  client.setCallback(callback);
   
+  WiFi.mode(WIFI_STA);                 //WiFi Station Mode
+  WiFi.begin(SSID, PASS);
+
+  WiFi.setHostname(tank_addr);        // Sets device name into DHCP Server
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    //Serial.print(".");
+  }
+
+  // Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  client.setServer(MQTT_Broker_IP, 1883);
+  //client.setCallback(callback);       // Required for subsribing to MQTT Topics
+
   //MQTT TOPIC Dependants
-  strcat(HEARTBEAT_TOPIC,tank_addr); strcat(HEARTBEAT_TOPIC,"/DATA/HEART");    //TANK_x/DATA/HEART    17 characters
-  strcat(DO_TOPIC,tank_addr); strcat(DO_TOPIC,"/DATA/LT105A");                 //TANK_x/DATA/LT105A  20 characters
-  strcat(pH_TOPIC,tank_addr); strcat(pH_TOPIC,"/DATA/LT1729D");                //TANK_x/DATA/LT1729D  20 characters
+  strcat(HEARTBEAT_TOPIC, tank_addr);
+  strcat(HEARTBEAT_TOPIC, "/DATA/HEART"); //TANK_x/DATA/HEART    17 characters
+  strcat(DO_TOPIC, tank_addr);
+  strcat(DO_TOPIC, "/DATA/LT105A"); //TANK_x/DATA/LT105A  20 characters
+  strcat(pH_TOPIC, tank_addr);
+  strcat(pH_TOPIC, "/DATA/LT1729D"); //TANK_x/DATA/LT1729D  20 characters
 }
-
-
 
 float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Data to float value
 {
@@ -84,7 +82,7 @@ float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Da
   const char *temp = SubscribedData.c_str();
   /* Serial.println(temp);                 //Debugging */
 
-  if (char *ret = strstr(temp, "\"DO\":"))
+  if (strstr(temp, "\"DO\":"))
   {
     float val = atof(&SubscribedData[6]); //Converts String to float
                                           /*  Serial.print("Float is: ");           // Debugging
@@ -97,85 +95,60 @@ float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Da
   }
 }
 
-
-void reconnect()
+boolean reconnect()
 {
-  // Loop until we're reconnected
-  while (!client.connected())
+  if (client.connect(tank_addr))
   {
-    //delay(10000);
-
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect(tank_addr))
-    {
-      Serial.println("connected");
-      // Subscribe
-      //client.subscribe("TANK2/DATA/LT105A"); // Subscribes to Topic
-    }
-    else
-    {
-      Serial.print("failed, rc="); Serial.print(client.state()); Serial.println(" try again in 5 seconds"); // Wait 5 seconds before retrying
-      delay(5000);
-      //setup_wifi(SSID,PASS);                                 //Re-initialises WiFi
-    }
-  }  
+    // Once connected, publish an announcement...
+    //client.publish(tank_addr, "Connected");
+    Serial.println("MQTT Broker Connected");
+    // ... and resubscribe
+    //client.subscribe("inTopic");
+  }
+  return client.connected();
 }
 
-
-char publish(float var, const char * tag, const char * publish_topic)
+void publish(float var, const char *tag, const char *publish_topic)
 {
-   char str[50];
-   char temp[8];
+  char str[50];
+  char temp[8];
 
-    dtostrf(var, 1, 2, temp);
-    strcpy(str, "{");
-    //strcat(str, "\"HEARTBEAT\"");
-    strcat(str, "\"");
-    strcat(str, tag);
-    strcat(str, "\"");
-    strcat(str, "\:");
-    strcat(str, temp);
-    strcat(str, "}");
-    client.publish(publish_topic, str);
+  dtostrf(var, 1, 2, temp);
+  strcpy(str, "{");
+  //strcat(str, "\"HEARTBEAT\"");
+  strcat(str, "\"");
+  strcat(str, tag);
+  strcat(str, "\"");
+  strcat(str, "\:");
+  strcat(str, temp);
+  strcat(str, "}");
+  client.publish(publish_topic, str);
 
-    memset(str, 0, sizeof(str)); //Empties array
+  memset(str, 0, sizeof(str)); //Empties array
 }
 
-void mqttloop()           // This part needs to be in loop
+void mqttloop() // This part needs to be in loop
 {
-
-  long now = millis();   //MQTT dependant
-  
-
 
   if (!client.connected())
-  { //Reconnect if network fails
-    reconnect();
-  }
-  client.loop();
-
-
-  if (now - lastMsg > 5000)
   {
-    lastMsg = now;
-    
-    
-
-    
-    
-
-    /* publish(DOmgl,"DO",DO_TOPIC);
-    publish(DO_Temp,"Temperature",DO_TOPIC); */
-
-    //publish(ORP,"ORP",pH_TOPIC);
-    
-    //publish(resitance,"Resistance",pH_TOPIC);
-
-    /* Serial.print("DO: "); Serial.println(DOmgl);
-    Serial.print("pH: "); Serial.println(ph_val); */
-
-    
+    long now = millis();
+    if (now - lastReconnectAttempt > 5000)
+    {
+      lastReconnectAttempt = now;
+      // Attempt to reconnect
+      if (reconnect())
+      {
+        lastReconnectAttempt = 0;
+      }
+    }
   }
+  else
+  {
+    // Client connected
+
+    client.loop();
+  }
+
   //MQTT End
 }
