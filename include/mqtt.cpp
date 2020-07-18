@@ -3,7 +3,6 @@
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
-
 #include <WiFiClient.cpp>
 #include <PubSubClient.h>
 #include "variables.h"
@@ -13,7 +12,6 @@ boolean heartbeat = 0; // Heartbeat of ESP32
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastReconnectAttempt = 0;
-
 
 void callback(char *topic, byte *message, unsigned int length)
 {
@@ -47,23 +45,23 @@ void callback(char *topic, byte *message, unsigned int length)
 
 void mqtt_init()
 {
-  
-  WiFi.mode(WIFI_STA);                 //WiFi Station Mode
+  WiFi.mode(WIFI_STA); //WiFi Station Mode
   WiFi.begin(SSID, PASS);
 
-  WiFi.setHostname(tank_addr);        // Sets device name into DHCP Server
+  WiFi.setHostname(tank_addr); // Sets device name into DHCP Server
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     //Serial.print(".");
   }
+  WiFi.setAutoReconnect(true); // Enables Auto Reconnect
+  WiFi.persistent(true);       // Stores WiFi information into SDK
 
   // Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
   client.setServer(MQTT_Broker_IP, 1883);
   //client.setCallback(callback);       // Required for subsribing to MQTT Topics
 
@@ -99,8 +97,6 @@ boolean reconnect()
 {
   if (client.connect(tank_addr))
   {
-    // Once connected, publish an announcement...
-    //client.publish(tank_addr, "Connected");
     Serial.println("MQTT Broker Connected");
     // ... and resubscribe
     //client.subscribe("inTopic");
@@ -129,6 +125,16 @@ void publish(float var, const char *tag, const char *publish_topic)
 
 void mqttloop() // This part needs to be in loop
 {
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("wificonnect !!!!");
+  }
+  else
+  {
+    Serial.println("failed !!!!");
+    WiFi.reconnect();
+  }
 
   if (!client.connected())
   {

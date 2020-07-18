@@ -1,3 +1,7 @@
+18/07/2020:
+mqtt.cpp:
+        WiFi.reconnect() added
+
 15/07/2020:
 DOpH.cpp:        
         DO():
