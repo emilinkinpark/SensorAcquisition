@@ -99,8 +99,8 @@ void setup()
   timerAttachInterrupt(watchdogTimer, &resetModule, true);
   timerAlarmWrite(watchdogTimer, 35000000, false); // Watchdog Time set in us; Default 35 seconds
   timerAlarmEnable(watchdogTimer);                 //enable interrupt
-
-  mqtt_init(); //Initialising MQTT Dependencies Runs on Core 0;
+  wifi_init();  //Initialise WiFi
+  mqtt_init(); //Initialise MQTT Dependencies Runs on Core 0;
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
   //bmeInit(); // Initialising BME680 Dependencies
