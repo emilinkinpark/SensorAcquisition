@@ -47,9 +47,14 @@ void callback(char *topic, byte *message, unsigned int length)
 
 void wifi_init()
 {
-  WiFi.begin(SSID, PASS);
-  WiFi.mode(WIFI_STA);         //WiFi Station Mode
   WiFi.setHostname(tank_addr); // Sets device name into DHCP Server
+
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+  Serial.println("STA Failed to configure");
+}
+
+  WiFi.begin(SSID, PASS);
+  
 
   while (WiFi.status() != WL_CONNECTED)
   {
