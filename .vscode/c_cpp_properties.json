@@ -6,11 +6,15 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:/Users/emili/.platformio/lib/Adafruit BME680 Library",
+                "C:/Users/emili/.platformio/lib/Adafruit Unified Sensor",
                 "C:/Users/emili/.platformio/lib/PubSubClient/src",
                 "C:/Users/emili/.platformio/lib/Smoothed_ID5922/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
+                "C:/Users/emili/.platformio/lib/Adafruit BusIO",
+                "C:/Users/emili/.platformio/lib/Adafruit MAX31865 library",
                 "C:/Users/emili/.platformio/lib/AsyncMqttClient_ID346/src",
                 "C:/Users/emili/.platformio/lib/AsyncTCP_ID1826/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
@@ -102,11 +106,15 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
+                    "C:/Users/emili/.platformio/lib/Adafruit BME680 Library",
+                    "C:/Users/emili/.platformio/lib/Adafruit Unified Sensor",
                     "C:/Users/emili/.platformio/lib/PubSubClient/src",
                     "C:/Users/emili/.platformio/lib/Smoothed_ID5922/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
+                    "C:/Users/emili/.platformio/lib/Adafruit BusIO",
+                    "C:/Users/emili/.platformio/lib/Adafruit MAX31865 library",
                     "C:/Users/emili/.platformio/lib/AsyncMqttClient_ID346/src",
                     "C:/Users/emili/.platformio/lib/AsyncTCP_ID1826/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",

@@ -16,7 +16,6 @@
 #include "esp_system.h"
 #include "DOpH.cpp"
 
-
 //Serial Pins Definition
 
 #define UART1_RX 4
@@ -99,32 +98,36 @@ void setup()
   timerAttachInterrupt(watchdogTimer, &resetModule, true);
   timerAlarmWrite(watchdogTimer, 35000000, false); // Watchdog Time set in us; Default 35 seconds
   timerAlarmEnable(watchdogTimer);                 //enable interrupt
-  wifi_init();  //Initialise WiFi
+
+  wifi_init(); //Initialise WiFi
+  
   mqtt_init(); //Initialise MQTT Dependencies Runs on Core 0;
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+
   //bmeInit(); // Initialising BME680 Dependencies
 }
 
-void loop() // All Modbus Operation
+void loop()
 {
-  //xPortGetCoreID();          //Find out which core is running
+
+  ////xPortGetCoreID();          //Find out which core is running
   //longtime = millis();
 
   timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
-  mqttloop();                   //MQTT Start
+  mqttloop(); //MQTT Start
 
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-  //bmeRun(); //BME680 reading
+  // //bmeRun(); //BME680 reading
   DO(); //Measuring Dissolved Oxygen
 
   pH(); //Measuring pH
 
   heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
-  delay(4800);
-  // longtime = millis() - longtime;
-  // Serial.println(longtime);
+  delay(5000);
+  /* longtime = millis() - longtime;
+  Serial.println(longtime); */
 }

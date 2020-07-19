@@ -3,15 +3,15 @@
 //#include "bme680.cpp"
 
 //Topic Declaration12
-char tank_addr[8] = "TANK_X"; //Insert TANK Address
+char tank_addr[8] = "TANK_1"; //Insert TANK Address
 
 char HEARTBEAT_TOPIC[18];
 char DO_TOPIC[20];
 char pH_TOPIC[20];
 
 //WIFI
-#define SSID "GloryAgro"   //"Glory"                //         "GloryOffice"
-#define PASS "Gloryart1!1" // "razurahat@1!1"
+#define SSID "GloryAgro"   //"Glory"                //         "GloryOffice"              //"AsmaulsRedmi"//
+#define PASS "Gloryart1!1" // "razurahat@1!1"                                             //"hackyou123"//
 
 //MQTT
 //#define Client_Name "TANK1"

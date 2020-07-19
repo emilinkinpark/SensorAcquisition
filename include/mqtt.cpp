@@ -3,12 +3,14 @@
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
-#include <WiFiClient.cpp>
+#include <WiFi.h>
 #include <PubSubClient.h>
+
 #include "variables.h"
 
 boolean heartbeat = 0; // Heartbeat of ESP32
 float wifi_strength = 0.00;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastReconnectAttempt = 0;
@@ -45,17 +47,15 @@ void callback(char *topic, byte *message, unsigned int length)
 
 void wifi_init()
 {
-  WiFi.mode(WIFI_STA); //WiFi Station Mode
   WiFi.begin(SSID, PASS);
+  WiFi.mode(WIFI_STA);         //WiFi Station Mode
   WiFi.setHostname(tank_addr); // Sets device name into DHCP Server
-  wifi_strength = WiFi.RSSI();
 
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     //Serial.print(".");
   }
-  
 
   // Serial.println("");
   Serial.println("WiFi connected");
@@ -65,7 +65,7 @@ void wifi_init()
 
 void mqtt_init()
 {
-  
+
   client.setServer(MQTT_Broker_IP, 1883);
   //client.setCallback(callback);       // Required for subsribing to MQTT Topics
 
@@ -129,11 +129,13 @@ void publish(float var, const char *tag, const char *publish_topic)
 
 void mqttloop() // This part needs to be in loop
 {
-  if (WiFi.status() != WL_CONNECTED)
+  if (WiFi.status() == WL_DISCONNECTED)
   {
-     wifi_init();
-     delay(100);
-     mqtt_init();
+    Serial.println("Resetting");
+    Serial.println("Waiting 10 seconds");
+    delay(10000);
+    //Serial.println(WiFi.status());
+    ESP.restart();
   }
 
   if (!client.connected())
@@ -152,9 +154,10 @@ void mqttloop() // This part needs to be in loop
   else
   {
     // Client connected
-
+    wifi_strength = WiFi.RSSI();
+    publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
     client.loop();
   }
-   publish(wifi_strength,"WiFi_RSSI",HEARTBEAT_TOPIC);        // Sends out WiFi AP Signal Strength
+
   //MQTT End
 }
