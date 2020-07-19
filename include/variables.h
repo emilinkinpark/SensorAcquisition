@@ -4,7 +4,7 @@
 
 //Topic Declaration12
 char tank_addr[8] = "TANK_X"; //Insert TANK Address
-IPAddress local_IP(192, 168, 0, 15);
+IPAddress local_IP(192, 168, 0, 16);
 
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
