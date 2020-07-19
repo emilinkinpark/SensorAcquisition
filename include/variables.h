@@ -2,9 +2,15 @@
 //#include "DOpH.cpp"
 //#include "bme680.cpp"
 
+/* IP Reserved List
+TANK_1      192,168,0,14
+TANK_2      192,168,0,15
+TANK_3      192,168,0,16
+*/
+
 //Topic Declaration12
 char tank_addr[8] = "TANK_X"; //Insert TANK Address
-IPAddress local_IP(192, 168, 0, 16);
+IPAddress local_IP(192, 168, 0, 17);
 
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
