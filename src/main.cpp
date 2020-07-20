@@ -16,7 +16,6 @@
 #include <esp_system.h>
 #include <EEPROM.h>
 
-#include "wifi_cred.h"
 #include "DOpH.cpp"
 
 #define EEPROM_SIZE 1
@@ -27,8 +26,9 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-int wifi_fault_status = 0.00;
-uint8_t sta_was_connected = false;
+byte heartbeat = 0;
+
+float wifi_strength = 0.00;
 //long longtime = 0;
 
 hw_timer_t *watchdogTimer = NULL;
@@ -85,77 +85,6 @@ void IRAM_ATTR resetModule() //Resets on Watchdog
   ets_printf("reboot\n");
   esp_restart();
 }
-
-void wifi_reconnect()
-{
-  wifi_fault_status = wifi_fault_status + 1;
-  EEPROM.write(0, wifi_fault_status);
-  EEPROM.commit();
-  delay(10000);
-  WiFi.disconnect();
-  WiFi.reconnect();
-}
-
-void setup_wifi()
-{
-  WiFi.disconnect();
-  uint16_t count = 0;
-  delay(10);
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to ");
-  Serial.println(SSID);
-  WiFi.mode(WIFI_STA);
-  if (!sta_was_connected)
-    WiFi.begin(SSID, PASS); //sta_was_connected is global, init'd to false.
-  else
-    WiFi.reconnect();
-  while ((WiFi.status() != WL_CONNECTED) && (count < 50))
-  {
-    delay(500);
-    count++;
-    if (Serial.available())
-    {
-      Serial.printf("WiFi.status=%d\n", WiFi.status());
-      Serial.read();
-    }
-    else
-      Serial.print(".");
-  }
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("");
-    Serial.printf("WiFi Connection Failed, status=%d", WiFi.status());
-  }
-
-  switch (WiFi.status())
-  {
-  case 1: //NO_SSID_AVAILABLE
-    wifi_reconnect();
-    break;
-  case 3: //WL_CONNECTED
-    sta_was_connected = WiFi.status() == WL_CONNECTED;
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-    Serial.println("Godspeed!!!");
-
-    break;
-  case 4: //WL_CONNECT_FAILED
-    wifi_reconnect();
-    break;
-  case 5: //WL_CONNECTION_LOST
-    wifi_reconnect();
-    break;
-  case 6: //WL_DISCONNECTED
-    wifi_reconnect();
-    break;
-  default:
-    // Not Required
-    break;
-  }
-}
-
 
 void setup()
 {
@@ -217,7 +146,7 @@ void loop()
     wifi_reconnect();
     break;
   case 6: //WL_DISCONNECTED
-    Serial.println("WL_DISCONNECTED... Reconnecting in 10 seconds");
+    Serial.println("WL_DISCONNECTED... Reconnecting in 10 seconds (Loop)");
     wifi_reconnect();
     break;
   default:
@@ -232,7 +161,7 @@ void loop()
 
     wifi_strength = WiFi.RSSI();
     publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
-    Serial.println(wifi_strength);
+    //Serial.println(wifi_strength);
     publish(wifi_fault_status, "WiFi_Fault", HEARTBEAT_TOPIC); // Updates MQTT Broker with wifi_fault_status
 
     heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission

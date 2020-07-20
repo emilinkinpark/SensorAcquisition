@@ -50,29 +50,23 @@ void DO()
   float averagedomgl = 0.00;
   byte DOfaultstatus = 0;
 
-  // Stop Measurement
-  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
+  // Start Measurement
+  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
   if (Serial2.available())
   {
     serial_flush_buffer(3); //Cleaning Response
   }
 
-  // Start Measurement
-  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
-
-  if (Serial2.available())
-  {
-    serial_flush_buffer(3); //Cleaning Response
-  }                         //Cleaning Response
-  delay(2000);              // 2s Delay
+  delay(2000); // 2s Delay
   //Serial.println("Starting Measurement");
 
   for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
   {
     modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
-    delay(100);
 
     modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
+    delay(100);
+
     //Serial.println("Data Acquired");
 
     if (o2[0] != O2_slaveID_DEC) //Slave ID Check
@@ -112,7 +106,6 @@ void DO()
       do_heart = 0;                     //Sends out when DO Sensor Fails
       ets_printf("DO Sensor Failed\n"); // Reports error
       publish(do_heart, "DO", HEARTBEAT_TOPIC);
-      count = 10; //End the loop
     }
     else
     {
@@ -122,7 +115,6 @@ void DO()
 
   // Stop Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
-  delay(100);
   if (Serial2.available())
   {
     serial_flush_buffer(3); //Cleaning Response
@@ -149,7 +141,7 @@ void pH()
   ph_heart = 0;
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
-  delay(100);
+
   for (byte i = 1; i <= 5; i++)
   {
     modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
