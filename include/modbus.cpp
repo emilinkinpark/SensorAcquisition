@@ -97,12 +97,13 @@ void serial_flush_buffer(uint8_t serialportnumber)
     {
       ; // do
     }
-
+  break;
   case 2:
     while (Serial1.read() >= 0)
     {
       ; // do
     }
+    break;
   case 3:
     while (Serial2.read() >= 0)
     {

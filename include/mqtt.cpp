@@ -3,10 +3,13 @@
 Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
 */
 
-#include <WiFi.h>
+
 #include <PubSubClient.h>
 
-#include "variables.h"
+#include "mqtt_variables.h"
+#include "esp_system.h"
+
+
 
 boolean heartbeat = 0; // Heartbeat of ESP32
 float wifi_strength = 0.00;
@@ -45,28 +48,6 @@ void callback(char *topic, byte *message, unsigned int length)
   } */
 }
 
-void wifi_init()
-{
-  WiFi.setHostname(tank_addr); // Sets device name into DHCP Server
-
-  if (!WiFi.config(local_IP, gateway, subnet)) {
-  Serial.println("STA Failed to configure");
-}
-
-  WiFi.begin(SSID, PASS);
-  
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    //Serial.print(".");
-  }
-
-  // Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-}
 
 void mqtt_init()
 {
@@ -134,14 +115,6 @@ void publish(float var, const char *tag, const char *publish_topic)
 
 void mqttloop() // This part needs to be in loop
 {
-  if (WiFi.status() == WL_DISCONNECTED)
-  {
-    Serial.println("Resetting");
-    Serial.println("Waiting 10 seconds");
-    delay(10000);
-    //Serial.println(WiFi.status());
-    ESP.restart();
-  }
 
   if (!client.connected())
   {
@@ -159,8 +132,7 @@ void mqttloop() // This part needs to be in loop
   else
   {
     // Client connected
-    wifi_strength = WiFi.RSSI();
-    publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
+
     client.loop();
   }
 

@@ -50,26 +50,39 @@ void DO()
   float averagedomgl = 0.00;
   byte DOfaultstatus = 0;
 
+  // Stop Measurement
+  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
+  if (Serial2.available())
+  {
+    serial_flush_buffer(3); //Cleaning Response
+  }
+
   // Start Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
-  serial_flush_buffer(3);                                            //Cleaning Response
-  delay(2000);                                                       // 2s Delay
+
+  if (Serial2.available())
+  {
+    serial_flush_buffer(3); //Cleaning Response
+  }                         //Cleaning Response
+  delay(2000);              // 2s Delay
   //Serial.println("Starting Measurement");
 
   for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
   {
     modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
-
-    modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
     delay(100);
 
+    modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
     //Serial.println("Data Acquired");
 
     if (o2[0] != O2_slaveID_DEC) //Slave ID Check
     {
       // Serial.println("Slave ID not matched Transmission Halt!");
       //Serial.println(o2[0], HEX);
-      serial_flush_buffer(3); // Clears out any remaining UART receive buffer
+      if (Serial2.available())
+      {
+        serial_flush_buffer(3); //Cleaning Response
+      }
       count = count - 1;
       delay(1000);
     }
@@ -94,12 +107,12 @@ void DO()
         DOfaultstatus = 0;       // DOfaultstatus reset
       }
     }
-    if (DOfaultstatus >= 15)            // If Sensor does not respond 15 times then, publish error and break;
+    if (DOfaultstatus >= 15) // If Sensor does not respond 15 times then, publish error and break;
     {
       do_heart = 0;                     //Sends out when DO Sensor Fails
       ets_printf("DO Sensor Failed\n"); // Reports error
       publish(do_heart, "DO", HEARTBEAT_TOPIC);
-      break;
+      count = 10; //End the loop
     }
     else
     {
@@ -109,7 +122,11 @@ void DO()
 
   // Stop Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
-  serial_flush_buffer(3); //Cleaning Response
+  delay(100);
+  if (Serial2.available())
+  {
+    serial_flush_buffer(3); //Cleaning Response
+  }
   //delay(100);
   //  Serial.println("Stop Measurement");
 
@@ -132,7 +149,7 @@ void pH()
   ph_heart = 0;
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
-
+  delay(100);
   for (byte i = 1; i <= 5; i++)
   {
     modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
@@ -153,7 +170,10 @@ void pH()
     //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
     ph_heart = 1;
   }
-  serial_flush_buffer(3); //Cleaning Response
+  if (Serial2.available())
+  {
+    serial_flush_buffer(3); //Cleaning Response
+  }
 
   delay(500);
   publish(ph_heart, "pH", HEARTBEAT_TOPIC);
