@@ -125,7 +125,7 @@ void mqtt_init()
 {
 
   client.setServer(MQTT_Broker_IP, 1883);
-  //client.setCallback(callback);       // Required for subsribing to MQTT Topics
+  client.setCallback(callback);       // Required for subsribing to MQTT Topics
 
   //MQTT TOPIC Dependants
   strcat(HEARTBEAT_TOPIC, tank_addr);
