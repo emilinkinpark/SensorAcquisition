@@ -14,11 +14,7 @@
 */
 
 #include <esp_system.h>
-#include <EEPROM.h>
-
 #include "DOpH.cpp"
-
-#define EEPROM_SIZE 1
 
 //Serial Pins Definition
 #define UART1_RX 4
@@ -29,7 +25,6 @@
 byte heartbeat = 0;
 
 float wifi_strength = 0.00;
-//long longtime = 0;
 
 hw_timer_t *watchdogTimer = NULL;
 
@@ -90,18 +85,6 @@ void setup()
 {
 
   //xTaskCreatePinnedToCore(Core0code, "Task0", 10000, NULL, 1, NULL, 0);   // Handle to access core 0, ill advised to use while using WiFi or BLE
-  EEPROM.begin(EEPROM_SIZE);
-  wifi_fault_status = EEPROM.read(0); //Acquiring saved data from eeprom.
-
-  if (wifi_fault_status == 255)
-  {
-    EEPROM.write(0, 0);
-    EEPROM.commit(); //To be used only once to clear eeprom address data
-  }
-  else
-  {
-    //
-  }
 
   Serial.begin(9600); //TXD0 - used as serial decorder
 
@@ -112,14 +95,13 @@ void setup()
 
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
+  setup_wifi(); // Setup WiFi
+  mqtt_init();  // Initalise MQTT
+
   watchdogTimer = timerBegin(0, 80, true); //timer 0, div 80
   timerAttachInterrupt(watchdogTimer, &resetModule, true);
   timerAlarmWrite(watchdogTimer, 60000000, false); // Watchdog Time set in us; Default 60 seconds
   timerAlarmEnable(watchdogTimer);                 //enable interrupt
-
-  setup_wifi(); // Setup WiFi
-
-  mqtt_init(); //Initialise MQTT Dependencies Runs on Core 0;
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
 
@@ -129,53 +111,22 @@ void setup()
 void loop()
 {
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
+  wifi_check();  // Checks connectivity
 
-  switch (WiFi.status())
-  {
-  case 1: //NO_SSID_AVAILABLE
-    Serial.println("NO_SSID_AVAILABLE... Reconnecting in 10 seconds (Loop)");
-    wifi_reconnect();
-    break;
+  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
 
-  case 4: //WL_CONNECT_FAILED
-    Serial.println("WL_CONNECT_FAILED... Reconnecting in 10 seconds (Loop)");
-    wifi_reconnect();
-    break;
-  case 5: //WL_CONNECTION_LOST
-    Serial.println("WL_CONNECTION_LOST... Reconnecting in 10 seconds (Loop)");
-    wifi_reconnect();
-    break;
-  case 6: //WL_DISCONNECTED
-    Serial.println("WL_DISCONNECTED... Reconnecting in 10 seconds (Loop)");
-    wifi_reconnect();
-    break;
-  default:
+  mqttloop();
+  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
-    //Serial.println("Hey, I am working");
-    mqttloop();
-    publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
-    DO(); //Measuring Dissolved Oxygen
+  DO(); //Measuring Dissolved Oxygen
 
-    pH(); //Measuring pH
+  pH(); //Measuring pH
 
-    wifi_strength = WiFi.RSSI();
-    publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
-    //Serial.println(wifi_strength);
-    publish(wifi_fault_status, "WiFi_Fault", HEARTBEAT_TOPIC); // Updates MQTT Broker with wifi_fault_status
+  wifi_strength = WiFi.RSSI();
+  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
 
-    heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
-    publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
+  heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
+  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    delay(5000);
-  }
-
-  ////xPortGetCoreID();          //Find out which core is running
-  //longtime = millis();
-
-  // //bmeRun(); //BME680 reading
-
-  //
-  /* longtime = millis() - longtime;
-  Serial.println(longtime); */
+  delay(8000); //Waits 8 seconds
 }

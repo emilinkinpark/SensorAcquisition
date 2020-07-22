@@ -1,3 +1,8 @@
+22/07/2020:
+        A lot function removed.
+        wifi_check() added; WiFi reconnect working perfectly along with MQTT reconnect.
+        WiFi Transmit Power Set to max.
+
 20/07/2020:
         Added condition to check serial available for serial flushing.
         Wifi condition set and moved back to mqtt.h

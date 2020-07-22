@@ -5,7 +5,6 @@ Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqt
 
 #include <PubSubClient.h>
 #include "mqtt_variables.h"
-#include "esp_system.h"
 #include "wifi_cred.h"
 
 WiFiClient espClient;
@@ -14,81 +13,7 @@ PubSubClient client(espClient);
 long lastReconnectAttempt = 0;
 
 uint8_t wifi_fault_status = 0.00;
-
-uint8_t sta_was_connected = false;
-
-void wifi_reconnect()
-{
-  wifi_fault_status = wifi_fault_status + 1;
-  EEPROM.write(0, wifi_fault_status);
-  EEPROM.commit();
-  delay(10000);
-  WiFi.disconnect();
-  WiFi.reconnect();
-}
-
-void setup_wifi()
-{
-  // WiFi.disconnect();
-  uint16_t count = 0;
-  delay(10);
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to ");
-  Serial.println(SSID);
-  WiFi.mode(WIFI_STA); // WiFi Station mode
-  if (!sta_was_connected)
-    WiFi.begin(SSID, PASS); //sta_was_connected is global, init'd to false.
-  else
-    WiFi.reconnect();
-  while ((WiFi.status() != WL_CONNECTED) && (count < 50))
-  {
-    delay(500);
-    count++;
-    // if (Serial.available())
-    // {
-    //   Serial.printf("WiFi.status=%d\n", WiFi.status());
-    //   Serial.read();
-    // }
-    // else
-    //   Serial.print(".");
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    sta_was_connected = WiFi.status() == WL_CONNECTED;
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-    Serial.println("Godspeed!!!");
-  }
-  else
-  {
-    Serial.println("");
-    Serial.printf("WiFi Connection Failed, status=%d", WiFi.status());
-  }
-
-  // switch (WiFi.status())
-  // {
-  // case 1: //NO_SSID_AVAILABLE
-  //   wifi_reconnect();
-  //   break;
-  //   case 4: //WL_CONNECT_FAILED
-  //   wifi_reconnect();
-  //   break;
-  // case 5: //WL_CONNECTION_LOST
-  //   wifi_reconnect();
-  //   break;
-  // case 6: //WL_DISCONNECTED
-  //   wifi_reconnect();
-  //   break;
-  // default:
-  //   // Not Required
-  //   break;
-  // }
-}
-
-
-
+boolean sta_was_connected = false;
 
 
 void callback(char *topic, byte *message, unsigned int length)
@@ -123,9 +48,8 @@ void callback(char *topic, byte *message, unsigned int length)
 
 void mqtt_init()
 {
-
   client.setServer(MQTT_Broker_IP, 1883);
-  client.setCallback(callback);       // Required for subsribing to MQTT Topics
+  client.setCallback(callback); // Required for subsribing to MQTT Topics
 
   //MQTT TOPIC Dependants
   strcat(HEARTBEAT_TOPIC, tank_addr);
@@ -134,6 +58,99 @@ void mqtt_init()
   strcat(DO_TOPIC, "/DATA/LT105A"); //TANK_x/DATA/LT105A  20 characters
   strcat(pH_TOPIC, tank_addr);
   strcat(pH_TOPIC, "/DATA/LT1729D"); //TANK_x/DATA/LT1729D  20 characters
+}
+
+void setup_wifi()
+{
+  // We start by connecting to a WiFi network
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.mode(WIFI_STA); // WiFi Station mode
+  if (!sta_was_connected)
+  {
+    WiFi.begin(ssid, pass);
+    WiFi.mode(WIFI_STA);                // Station Mode Enable
+    WiFi.setHostname(tank_addr);        // Sets custom Device Name
+    Serial.println(WiFi.getHostname()); // Debugging
+    //WiFi.persistent(true);       // Store ssid and pass into SDK flash //deprected
+    WiFi.setAutoReconnect(true);         //Enables auto reconnect
+    WiFi.setTxPower(WIFI_POWER_19_5dBm); // Sets to max Transmit Power
+    Serial.print("Tx Power: "); Serial.println(WiFi.getTxPower());   // Debugging
+  }
+  else
+  {
+    WiFi.reconnect();
+  }
+  for (byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
+  {
+    delay(500);
+    if (Serial.available())
+    {
+      Serial.printf("WiFi.status=%d\n", WiFi.status());
+      Serial.read();
+    }
+    else
+      Serial.print(".");
+  }
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    sta_was_connected = WiFi.status() == WL_CONNECTED;
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    Serial.println("Godspeed!!!");
+  }
+  else
+  {
+    Serial.println("");
+    Serial.printf("WiFi Connection Failed, status=%d", WiFi.status());
+  }
+}
+
+boolean reconnect() // MQTT Reconnect Sub routine
+{
+  if (client.connect(tank_addr))
+  {
+    Serial.println("MQTT Broker Connected");
+    // ... and resubscribe
+    //client.subscribe("inTopic");
+  }
+  else
+  {
+    Serial.println("MQTT Broker Not Found");
+  }
+  return client.connected();
+}
+
+void wifi_check()
+{
+  //Serial.print("WiFi Status: "); Serial.println(WiFi.status());
+  delay(1000);
+
+  for (byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
+  {
+    delay(500);
+    if (Serial.available())
+    {
+      Serial.printf("WiFi.status=%d\n", WiFi.status());
+      Serial.read();
+    }
+    else
+      Serial.print(".");
+  }
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.reconnect();
+    reconnect();
+    /* Serial.print("Auto Reconnect Status: ");
+    Serial.println(WiFi.getAutoReconnect()); */
+  }
+  else
+  {
+    //DO Nothing
+  } 
 }
 
 float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Data to float value
@@ -153,17 +170,6 @@ float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Da
   {
     // Do Nothing
   }
-}
-
-boolean reconnect()
-{
-  if (client.connect(tank_addr))
-  {
-    Serial.println("MQTT Broker Connected");
-    // ... and resubscribe
-    //client.subscribe("inTopic");
-  }
-  return client.connected();
 }
 
 void publish(float var, const char *tag, const char *publish_topic)

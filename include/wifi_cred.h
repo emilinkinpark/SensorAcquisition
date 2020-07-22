@@ -4,8 +4,8 @@
 
 #include <WiFi.h>
 
-#define SSID "GloryAgro"       //"Glory"                //         "GloryOffice"       //"AsmaulsRedmi" //
-#define PASS "Gloryart1!1"       // "razurahat@1!1"                                    //"hackyou123"//
+#define ssid "GloryAgro"   //"AsmaulsRedmi" //  "Glory"                //         "GloryOffice"       //
+#define pass "Gloryart1!1" //"hackyou123"   //      // "razurahat@1!1"                                //
 
 //Static IP definitions
 /* 
