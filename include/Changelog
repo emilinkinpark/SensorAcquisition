@@ -2,6 +2,7 @@
         A lot function removed.
         wifi_check() added; WiFi reconnect working perfectly along with MQTT reconnect.
         WiFi Transmit Power Set to max.
+        Main loop delay changed from 5000ms to 8000ms
 
 20/07/2020:
         Added condition to check serial available for serial flushing.
