@@ -3,10 +3,12 @@
 
 #include "modbus.cpp"
 #include "conversions.cpp"
-//#include "mqtt.cpp"
+#include "mqtt.cpp"
+
 #include <Smoothed.h>
 
 Smoothed<float> AverageDOmgl;
+
 float averagedomgl = 0.00;
 
 // DO sensor ID
@@ -47,47 +49,31 @@ void DO()
 */
   int o2[13]; //O2 buffer length must have a size of 12 bytes
 
-  memset(o2, 0, sizeof(o2)); //Empties array
-
   byte DOfaultstatus = 0;
 
   // Start Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
-  if (Serial2.available())
+  if (Serial2.read() > 0)
   {
     serial_flush_buffer(3); //Cleaning Response
-  }
-
-  delay(2000); // 2s Delay
-  //Serial.println("Starting Measurement");
-
-  for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
-  {
-    modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
-
-    modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
     delay(100);
 
-    //Serial.println("Data Acquired");
+    for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
+    {
+      modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
 
-    if (o2[0] != O2_slaveID_DEC) //Slave ID Check
-    {
-      // Serial.println("Slave ID not matched Transmission Halt!");
-      //Serial.println(o2[0], HEX);
-      if (Serial2.available())
-      {
-        serial_flush_buffer(3); //Cleaning Response
-      }
-      count = count - 1;
-      delay(1000);
-    }
-    else
-    {
+      modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
+      delay(100);
+
+      //Serial.println("Data Acquired");
+
       DO_Temp = floatTOdecimal(o2[3], o2[4], o2[5], o2[6]);
       //float Temp_Manipulation = Conv_Temp * 100;
       //Temp_Send = Temp_Manipulation;
 
       float Conv_DOPerc = floatTOdecimal(o2[7], o2[8], o2[9], o2[10]);
+      memset(o2, 0, sizeof(o2)); //Empties array
+
       DOmgl = domglcalc(DO_Temp, Conv_DOPerc);
 
       if (isnan(DOmgl) != 0.00) // Checks Error Data Received
@@ -101,72 +87,91 @@ void DO()
         AverageDOmgl.add(DOmgl); // Adds Data for averaging
         DOfaultstatus = 0;       // DOfaultstatus reset
       }
+      if (DOfaultstatus >= 15) // If Sensor does not respond 15 times then, publish error and break;
+      {
+        do_heart = 0;                     //Sends out when DO Sensor Fails
+        ets_printf("DO Sensor Failed\n"); // Reports error
+        publish(do_heart, "DO", HEARTBEAT_TOPIC);
+
+        break;
+      }
+      else
+      {
+        do_heart = 1;
+      }
     }
-    if (DOfaultstatus >= 15) // If Sensor does not respond 15 times then, publish error and break;
+
+    // Stop Measurement
+    modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
+
+    if (Serial2.available())
     {
-      do_heart = 0;                     //Sends out when DO Sensor Fails
-      ets_printf("DO Sensor Failed\n"); // Reports error
-      break;
+      serial_flush_buffer(3); //Cleaning Response
+    }
+    //delay(100);
+    //  Serial.println("Stop Measurement");
+
+    averagedomgl = AverageDOmgl.get(); // Stores the average value
+
+    if (isnan(averagedomgl) != 0.00) // Checks Error Data Received
+    {
+      do_heart = 0;
+      publish(do_heart, "DO", HEARTBEAT_TOPIC);
     }
     else
     {
-      do_heart = 1;
+      publish(do_heart, "DO", HEARTBEAT_TOPIC);
+      publish(averagedomgl, "DO", DO_TOPIC);     // Sends average DOmg/L Data to Broker
+      publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
+      AverageDOmgl.clear();                      // Clears Average data
     }
-  }
-
-  // Stop Measurement
-  modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
-  if (Serial2.available())
-  {
-    serial_flush_buffer(3); //Cleaning Response
-  }
-  //delay(100);
-  //  Serial.println("Stop Measurement");
-
-  averagedomgl = AverageDOmgl.get(); // Stores the average value
-
-  if (isnan(averagedomgl) != 0.00) // Checks Error Data Received
-  {
-    do_heart = 0;
   }
   else
   {
-    AverageDOmgl.clear(); // Clears Average data
+    do_heart = 0;
+    publish(do_heart, "DO", HEARTBEAT_TOPIC);
+
+    Serial.println("DO Sensor Not Detected");
+    delay(1000);
   }
 
+  //Serial.println("Starting Measurement");
 }
 
 void pH()
 {
-  int ph_temp[13];                     //pH sensor buffer
-  memset(ph_temp, 0, sizeof(ph_temp)); //Empties array
+  int ph_temp[13]; //pH sensor buffer
 
   ph_heart = 0;
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
-
-  modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
-  delay(100);
-
-  if (ph_temp[0] != pH_slaveID_DEC) //Slave ID Check
+  if (Serial2.read() > 0)
   {
+    serial_flush_buffer(3); //Cleaning Response
+    delay(100);
+
+    modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
+    modbusRead(3, pH_slaveID_DEC, 15, ph_temp);                  //Acquiring Data and saving into ph_temp
+    delay(100);
+
     //Serial.println("Slave ID not matched Transmission Halt!");
     //Serial.println(o2[0], HEX);
-    ph_heart = 0;
-    memset(ph_temp, 0, sizeof(ph_temp)); //Empties array
-  }
-  else
-  {
     //ORP = hex16_signedint(ph_temp[3], ph_temp[4]) / 10.00;
     ph_val = hex16_signedint(ph_temp[5], ph_temp[6]) / 100.00;
     ph_temperature = hex16_signedint(ph_temp[7], ph_temp[8]) / 10.00;
+    memset(ph_temp, 0, sizeof(ph_temp)); //Empties array
+
     //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
     ph_heart = 1;
+    publish(ph_heart, "pH", HEARTBEAT_TOPIC);
+    publish(ph_val, "pH", pH_TOPIC);
+    publish(ph_temperature, "Temperature", pH_TOPIC);
+    delay(100);
   }
-  if (Serial2.available())
+  else
   {
-    serial_flush_buffer(3); //Cleaning Response
+    ph_heart = 0;
+    publish(ph_heart, "pH", HEARTBEAT_TOPIC);
+    Serial.println("pH Sensor Not Detected");
   }
-
-  delay(500);
 }

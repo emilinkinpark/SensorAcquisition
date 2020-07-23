@@ -1,63 +1,64 @@
 /*
-  Library Used: PubSubClient.h by knolleary 
-Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/
+  MQTT Client Powered by Eclipse Paho
 */
 
-#include <PubSubClient.h>
+#include <WIfi.h>
+#include <IPStack.h>
+#include <Countdown.h>
+#include <MQTTClient.h>
+
 #include "mqtt_variables.h"
 #include "wifi_cred.h"
-#include "DOpH.cpp"
 
 WiFiClient espClient;
-PubSubClient client(espClient);
-
-long lastReconnectAttempt = 0;
 
 uint8_t wifi_fault_status = 0.00;
 boolean sta_was_connected = false;
 
-void callback(char *topic, byte *message, unsigned int length)
+//WiFi and MQTT declarations
+WiFiClient wifi;
+IPStack ipstack(wifi);
+MQTT::Client<IPStack, Countdown, 50, 1> client = MQTT::Client<IPStack, Countdown, 50, 1>(ipstack);
+MQTT::Message message;
+
+void mqtt_topic_declaration()
 {
-  //Serial.print("Message arrived on topic: ");
-  //Serial.print(topic);
-  //Serial.print(". Message: ");
-  /* String messageTemp;
-
-  for (int i = 0; i < length; i++)
-  {
-    //Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  //Serial.println();
-
-  // Feel free to add more if statements to control more GPIOs with MQTT
-
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off".
-  // Changes the output state according to the message
-  if (String(topic) == "TANK2/DATA/LT105A")
-  {
-    float DO = Subsribe_Sensor_Data(messageTemp);
-    //Serial.print("Success: "); Serial.println(DO);   //Debugging 
-  }
-
-  else
-  {
-    Serial.println("No message");
-  } */
-}
-
-void mqtt_init()
-{
-  client.setServer(MQTT_Broker_IP, 1883);
-  client.setCallback(callback); // Required for subsribing to MQTT Topics
-
-  //MQTT TOPIC Dependants
   strcat(HEARTBEAT_TOPIC, tank_addr);
   strcat(HEARTBEAT_TOPIC, "/DATA/HEART"); //TANK_x/DATA/HEART    17 characters
   strcat(DO_TOPIC, tank_addr);
   strcat(DO_TOPIC, "/DATA/LT105A"); //TANK_x/DATA/LT105A  20 characters
   strcat(pH_TOPIC, tank_addr);
   strcat(pH_TOPIC, "/DATA/LT1729D"); //TANK_x/DATA/LT1729D  20 characters
+}
+
+void mqtt_init()
+{
+  char hostname[] = MQTT_Broker_IP;
+  int port = 1883;
+
+  Serial.print("Connecting to ");
+  Serial.print(hostname);
+  Serial.print(":");
+  Serial.println(port);
+
+  int rc = ipstack.connect(hostname, port);
+  if (rc != 1)
+  {
+    Serial.print("rc from TCP connect is ");
+    Serial.println(rc);
+  }
+
+  Serial.println("MQTT connecting");
+  MQTTPacket_connectData data = MQTTPacket_connectData_initializer;
+  data.MQTTVersion = 4;
+  data.clientID.cstring = (char *)tank_addr;
+  rc = client.connect(data);
+  if (rc != 0)
+  {
+    Serial.print("rc from MQTT connect is ");
+    Serial.println(rc);
+  }
+  Serial.println("MQTT connected");
 }
 
 void setup_wifi()
@@ -109,21 +110,6 @@ void setup_wifi()
   }
 }
 
-boolean reconnect() // MQTT Reconnect Sub routine
-{
-  if (client.connect(tank_addr))
-  {
-    Serial.println("MQTT Broker Connected");
-    // ... and resubscribe
-    //client.subscribe("inTopic");
-  }
-  else
-  {
-    Serial.println("MQTT Broker Not Found");
-  }
-  return client.connected();
-}
-
 void wifi_check()
 {
   //Serial.print("WiFi Status: "); Serial.println(WiFi.status());
@@ -143,9 +129,8 @@ void wifi_check()
 
   if (!WiFi.isConnected()) //(WiFi.status() != WL_CONNECTED)
   {
-    WiFi.reconnect();
     delay(1000);
-    reconnect();    //Mqtt
+    WiFi.reconnect();
   }
   else
   {
@@ -153,78 +138,41 @@ void wifi_check()
   }
 }
 
-float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Data to float value
+void publish(float var, const char *tag, const char *publish_topic) // Easy Routine to send data
 {
-  //Serial.println(messageTemp); // Working
-  const char *temp = SubscribedData.c_str();
-  /* Serial.println(temp);                 //Debugging */
-
-  if (strstr(temp, "\"DO\":"))
-  {
-    float val = atof(&SubscribedData[6]); //Converts String to float
-                                          /*  Serial.print("Float is: ");           // Debugging
-    Serial.println(val);                  // Debugging */
-    return val;
-  }
-  else
-  {
-    // Do Nothing
-  }
-}
-
-void publish(float var, const char *tag, const char *publish_topic)
-{
-  char str[50];
   char temp[8];
 
+  char buf[100];
   dtostrf(var, 1, 2, temp);
-  strcpy(str, "{");
-  //strcat(str, "\"HEARTBEAT\"");
-  strcat(str, "\"");
-  strcat(str, tag);
-  strcat(str, "\"");
-  strcat(str, "\:");
-  strcat(str, temp);
-  strcat(str, "}");
-  client.publish(publish_topic, str);
-
-  memset(str, 0, sizeof(str)); //Empties array
+  strcpy(buf, "{");
+  strcat(buf, "\"");
+  strcat(buf, tag);
+  strcat(buf, "\"");
+  strcat(buf, "\:");
+  strcat(buf, temp);
+  strcat(buf, "}");
+  message.qos = MQTT::QOS1;
+  message.retained = false;
+  message.dup = false;
+  message.payload = (void *)buf;
+  message.payloadlen = strlen(buf);
+  client.publish(publish_topic, message);
 }
 
-void mqttloop() // This part needs to be in loop
+void mqtt_send() // This part needs to be in loop
 {
 
-  if (!client.connected())
+  if (!client.isConnected())
   {
-    long now = millis();
-    if (now - lastReconnectAttempt > 5000)
-    {
-      lastReconnectAttempt = now;
-      // Attempt to reconnect
-      if (reconnect())
-      {
-        lastReconnectAttempt = 0;
-      }
-    }
+    mqtt_init();
   }
   else
   {
-    // Client connected
-
-    client.loop();
+    float wifi_strength = WiFi.RSSI();
+    publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
+    byte heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
+    publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
+    delay(8000); //Waits 8 seconds
   }
-  //DO
-  publish(do_heart, "DO", HEARTBEAT_TOPIC);
-  publish(averagedomgl, "DO", DO_TOPIC);     // Sends DOmg/L Data to Broker
-  publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
-  //pH
-  publish(ph_heart, "pH", HEARTBEAT_TOPIC);
-  publish(ph_val, "pH", pH_TOPIC);
-  publish(ph_temperature, "Temperature", pH_TOPIC);
-
-  float wifi_strength = WiFi.RSSI();
-  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
-
-  //MQTT End
 }

@@ -14,7 +14,8 @@
 */
 
 #include <esp_system.h>
-#include "mqtt.cpp"
+#include "DOpH.cpp"
+
 
 //Serial Pins Definition
 #define UART1_RX 4
@@ -26,52 +27,6 @@ byte heartbeat = 0;
 
 hw_timer_t *watchdogTimer = NULL;
 
-/* void Core0code(void *pvParameters) //Add Dual Core Capabilities; Dont use while using BLE or WIFI
-{
-  for (;;)
-  {
-
-    // bmeRun();          // Running bme680 codes
-    //   //TCS3200 Code Start
-    //   // Setting RED (R) filtered photodiodes to be read
-    //   digitalWrite(S2,LOW);
-    //   digitalWrite(S3,LOW);
-
-    //   // Reading the output frequency
-    //   redFrequency = pulseIn(sensorOut, LOW);
-
-    //    // Printing the RED (R) value
-    //   Serial.print("R = ");
-    //   Serial.print(redFrequency);
-    //   delay(100);
-
-    //   // Setting GREEN (G) filtered photodiodes to be read
-    //   digitalWrite(S2,HIGH);
-    //   digitalWrite(S3,HIGH);
-
-    //   // Reading the output frequency
-    //   greenFrequency = pulseIn(sensorOut, LOW);
-
-    //   // Printing the GREEN (G) value
-    //   Serial.print(" G = ");
-    //   Serial.print(greenFrequency);
-    //   delay(100);
-
-    //   // Setting BLUE (B) filtered photodiodes to be read
-    //   digitalWrite(S2,LOW);
-    //   digitalWrite(S3,HIGH);
-
-    //   // Reading the output frequency
-    //   blueFrequency = pulseIn(sensorOut, LOW);
-
-    //   // Printing the BLUE (B) value
-    //   Serial.print(" B = ");
-    //   Serial.println(blueFrequency);
-    //   delay(100);
-    // // TCS3200 code end
-  }
-} */
-
 void IRAM_ATTR resetModule() //Resets on Watchdog
 {
   ets_printf("reboot\n");
@@ -81,26 +36,23 @@ void IRAM_ATTR resetModule() //Resets on Watchdog
 void setup()
 {
 
-  //xTaskCreatePinnedToCore(Core0code, "Task0", 10000, NULL, 1, NULL, 0);   // Handle to access core 0, ill advised to use while using WiFi or BLE
-
   Serial.begin(9600); //TXD0 - used as serial decorder
 
-  /* Serial.println("Setup Time");
-  Serial.println(millis()); */
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
   //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
-
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
+  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+  
+
+  mqtt_topic_declaration();   // Initialises the MQTT Topics
   setup_wifi(); // Setup WiFi
   mqtt_init();  // Initalise MQTT
 
   watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
   timerAttachInterrupt(watchdogTimer, &resetModule, true); // Does resetModule Function when watchdog hits
-  timerAlarmWrite(watchdogTimer, 60000000, false);         // Watchdog Time set in us; Default 60 seconds
+  timerAlarmWrite(watchdogTimer, 30000000, false);         // Watchdog Time set in us; Default 30 seconds
   timerAlarmEnable(watchdogTimer);                         //enable interrupt
-
-  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
 
   //bmeInit(); // Initialising BME680 Dependencies
 }
@@ -112,12 +64,16 @@ void loop()
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
   wifi_check();  // Checks connectivity
 
-  mqttloop();
+  
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
   DO(); //Measuring Dissolved Oxygen
 
+  //Serial.println("I'm out of DO");
+
   pH(); //Measuring pH
+
+  //Serial.println("I'm out of pH");
 
   if (millis() >= 43200000) // Resets the device in 12 hours
   {
@@ -125,8 +81,7 @@ void loop()
   }
   else
   {
-    heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
-    publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
-    delay(8000); //Waits 8 seconds
+    mqtt_send();          //Sends a bunch of data
+    
   }
 }

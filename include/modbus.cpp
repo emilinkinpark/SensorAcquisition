@@ -425,8 +425,10 @@ void modbusRead(uint8_t serialportnumber, char SlaveID, int datalength, int *buf
 
       if (buffCount == datalength) //Break if Datalength Reached
       {
+        if (Serial2.available())
+        {
         serial_flush_buffer(3);
-        //break;
+        }
       }
       else
       {

@@ -6,8 +6,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/include",
-                "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/src",
+                "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/SensorAcquisition/include",
+                "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/SensorAcquisition/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/emili/.platformio/lib/PubSubClient_ID89/src",
                 "C:/Users/emili/.platformio/lib/Adafruit BME680 Library",
@@ -83,6 +83,7 @@
                 "C:/Users/emili/.platformio/lib/AsyncTCP_ID1826/src",
                 "C:/Users/emili/.platformio/lib/BSEC Software Library_ID6979/src",
                 "C:/Users/emili/.platformio/lib/MD_TCS230_ID960/src",
+                "C:/Users/emili/.platformio/lib/Paho",
                 "C:/Users/emili/.platformio/lib/arduinoFFT_ID1651/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
@@ -113,8 +114,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/include",
-                    "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/src",
+                    "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/SensorAcquisition/include",
+                    "C:/Users/emili/Documents/PlatformIO/Projects/SensorAcquisition/SensorAcquisition/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/emili/.platformio/lib/PubSubClient_ID89/src",
                     "C:/Users/emili/.platformio/lib/Adafruit BME680 Library",
@@ -190,6 +191,7 @@
                     "C:/Users/emili/.platformio/lib/AsyncTCP_ID1826/src",
                     "C:/Users/emili/.platformio/lib/BSEC Software Library_ID6979/src",
                     "C:/Users/emili/.platformio/lib/MD_TCS230_ID960/src",
+                    "C:/Users/emili/.platformio/lib/Paho",
                     "C:/Users/emili/.platformio/lib/arduinoFFT_ID1651/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/emili/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
