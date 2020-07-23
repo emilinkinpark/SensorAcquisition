@@ -33,9 +33,12 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     float T = 273.15 + t; //Temperature in Kelvin
 
     /*Constants*/
-    float const S = 11.00;                       //11.0;         //Salinity Taken 10 as constant
+    float const S = 12.00;                       //Salinity Taken 12 as constant
     float const atm_pressure = 101.325;          //Atmospheric Pressure in kPa
-    float const pressure = 16.06 + atm_pressure; //pressure in kPa; const pressure in salt water at 1.60m depth; more at https://bluerobotics.com/learn/pressure-depth-calculator/
+    float const water_depth = 1.60;              // Unit of height: m;
+    float const rho_saltwater = 1023.6;          //Unit of Density: kg/m^3
+    float const g = 9.80665;                     // Unit of Acceleration due to gravity: m/s^2
+    float pressure = ((rho_saltwater*g*water_depth)/1000) + atm_pressure; //pressure in kPa;
     float const A1 = -173.4292;
     float const A2 = 249.6339;
     float const A3 = 143.3483;
@@ -61,16 +64,16 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     return DOmgL;
 }
 
-uint16_t dec16_hex8(uint16_t byte1)                             // Converts 16 bit decimal to 8bit hex
+uint16_t dec16_hex8(uint16_t byte1) // Converts 16 bit decimal to 8bit hex
 {
     uint8_t temp_arr[2];
     temp_arr[0] = (byte1 >> 8);   //Higher Bits
     temp_arr[1] = (byte1 & 0xFF); //Lower Bits
 
-    return (temp_arr[0] << 8 |temp_arr[1]);
+    return (temp_arr[0] << 8 | temp_arr[1]);
 }
 
-int16_t hex16_signedint(uint8_t byte1, uint8_t byte2)          // Converts two 8 bits HEX into a single signed integer
+int16_t hex16_signedint(uint8_t byte1, uint8_t byte2) // Converts two 8 bits HEX into a single signed integer
 {
     uint8_t sign_check = byte1 >> 7;
 
@@ -78,15 +81,14 @@ int16_t hex16_signedint(uint8_t byte1, uint8_t byte2)          // Converts two 8
     {
         uint8_t compliment_1 = ~(byte1);
 
-        uint8_t  compliment_2 = ~(byte2)+1;  //2's compliment
+        uint8_t compliment_2 = ~(byte2) + 1; //2's compliment
 
-        int16_t compliment = -1*((compliment_1<<8)|compliment_2);
+        int16_t compliment = -1 * ((compliment_1 << 8) | compliment_2);
 
         return (compliment);
-        
     }
     else
     {
-        return(byte1<<8|byte2);
+        return (byte1 << 8 | byte2);
     }
 }
