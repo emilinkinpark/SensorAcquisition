@@ -14,7 +14,7 @@
 */
 
 #include <esp_system.h>
-#include "DOpH.cpp"
+#include "mqtt.cpp"
 
 //Serial Pins Definition
 #define UART1_RX 4
@@ -23,8 +23,6 @@
 #define UART2_TX 17
 
 byte heartbeat = 0;
-
-float wifi_strength = 0.00;
 
 hw_timer_t *watchdogTimer = NULL;
 
@@ -76,7 +74,7 @@ hw_timer_t *watchdogTimer = NULL;
 
 void IRAM_ATTR resetModule() //Resets on Watchdog
 {
-    ets_printf("reboot\n");
+  ets_printf("reboot\n");
   esp_restart();
 }
 
@@ -97,10 +95,10 @@ void setup()
   setup_wifi(); // Setup WiFi
   mqtt_init();  // Initalise MQTT
 
-  watchdogTimer = timerBegin(0, 80, true); //timer 0, div 80
-  timerAttachInterrupt(watchdogTimer, &resetModule, true);  // Does resetModule Function when watchdog hits
-  timerAlarmWrite(watchdogTimer, 60000000, false); // Watchdog Time set in us; Default 60 seconds
-  timerAlarmEnable(watchdogTimer);                 //enable interrupt
+  watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
+  timerAttachInterrupt(watchdogTimer, &resetModule, true); // Does resetModule Function when watchdog hits
+  timerAlarmWrite(watchdogTimer, 60000000, false);         // Watchdog Time set in us; Default 60 seconds
+  timerAlarmEnable(watchdogTimer);                         //enable interrupt
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
 
@@ -109,10 +107,10 @@ void setup()
 
 void loop()
 {
+  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
+
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
   wifi_check();  // Checks connectivity
-
-  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
 
   mqttloop();
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
@@ -121,22 +119,14 @@ void loop()
 
   pH(); //Measuring pH
 
-  wifi_strength = WiFi.RSSI();
-  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
-
-  heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
-  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
-
-  delay(8000); //Waits 8 seconds
-
-  if(millis() >= 43200000)        // Resets the device in 12 hours
+  if (millis() >= 43200000) // Resets the device in 12 hours
   {
-   resetModule();
+    resetModule();
   }
   else
   {
-      //DO Nothing
+    heartbeat = 0; //Heartbeat publishes 0 to mark end of transmission
+    publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
+    delay(8000); //Waits 8 seconds
   }
-  
-
 }

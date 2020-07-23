@@ -6,6 +6,7 @@ Initial Code Concent from Rui Santos - https://randomnerdtutorials.com/esp32-mqt
 #include <PubSubClient.h>
 #include "mqtt_variables.h"
 #include "wifi_cred.h"
+#include "DOpH.cpp"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -14,7 +15,6 @@ long lastReconnectAttempt = 0;
 
 uint8_t wifi_fault_status = 0.00;
 boolean sta_was_connected = false;
-
 
 void callback(char *topic, byte *message, unsigned int length)
 {
@@ -75,13 +75,14 @@ void setup_wifi()
     //WiFi.persistent(true);       // Store ssid and pass into SDK flash //deprected
     WiFi.setAutoReconnect(true);         //Enables auto reconnect
     WiFi.setTxPower(WIFI_POWER_19_5dBm); // Sets to max Transmit Power
-    Serial.print("Tx Power: "); Serial.println(WiFi.getTxPower());   // Debugging
+    Serial.print("Tx Power: ");
+    Serial.println(WiFi.getTxPower()); // Debugging
   }
   else
   {
     WiFi.reconnect();
   }
-  for (byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
+  for (byte count = 0; (!WiFi.isConnected()) && (count < 30); count++) //(byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
   {
     delay(500);
     if (Serial.available())
@@ -92,7 +93,7 @@ void setup_wifi()
     else
       Serial.print(".");
   }
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.isConnected()) //(WiFi.status() == WL_CONNECTED)
   {
     sta_was_connected = WiFi.status() == WL_CONNECTED;
     Serial.println("");
@@ -128,7 +129,7 @@ void wifi_check()
   //Serial.print("WiFi Status: "); Serial.println(WiFi.status());
   delay(1000);
 
-  for (byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
+  for (byte count = 0; (!WiFi.isConnected()) && (count < 30); count++) //(byte count = 0; (WiFi.status() != WL_CONNECTED) && (count < 50); count++)
   {
     delay(500);
     if (Serial.available())
@@ -140,17 +141,16 @@ void wifi_check()
       Serial.print(".");
   }
 
-  if (WiFi.status() != WL_CONNECTED)
+  if (!WiFi.isConnected()) //(WiFi.status() != WL_CONNECTED)
   {
     WiFi.reconnect();
-    reconnect();
-    /* Serial.print("Auto Reconnect Status: ");
-    Serial.println(WiFi.getAutoReconnect()); */
+    delay(1000);
+    reconnect();    //Mqtt
   }
   else
   {
     //DO Nothing
-  } 
+  }
 }
 
 float Subsribe_Sensor_Data(String &SubscribedData) //Converts Subscribed MQTT Data to float value
@@ -213,6 +213,18 @@ void mqttloop() // This part needs to be in loop
 
     client.loop();
   }
+  //DO
+  publish(do_heart, "DO", HEARTBEAT_TOPIC);
+  publish(averagedomgl, "DO", DO_TOPIC);     // Sends DOmg/L Data to Broker
+  publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
+
+  //pH
+  publish(ph_heart, "pH", HEARTBEAT_TOPIC);
+  publish(ph_val, "pH", pH_TOPIC);
+  publish(ph_temperature, "Temperature", pH_TOPIC);
+
+  float wifi_strength = WiFi.RSSI();
+  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
 
   //MQTT End
 }

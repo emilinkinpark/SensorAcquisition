@@ -3,10 +3,11 @@
 
 #include "modbus.cpp"
 #include "conversions.cpp"
-#include "mqtt.cpp"
+//#include "mqtt.cpp"
 #include <Smoothed.h>
 
 Smoothed<float> AverageDOmgl;
+float averagedomgl = 0.00;
 
 // DO sensor ID
 #define O2_slaveID 0x0E
@@ -47,7 +48,7 @@ void DO()
   int o2[13]; //O2 buffer length must have a size of 12 bytes
 
   memset(o2, 0, sizeof(o2)); //Empties array
-  float averagedomgl = 0.00;
+
   byte DOfaultstatus = 0;
 
   // Start Measurement
@@ -105,7 +106,7 @@ void DO()
     {
       do_heart = 0;                     //Sends out when DO Sensor Fails
       ets_printf("DO Sensor Failed\n"); // Reports error
-      publish(do_heart, "DO", HEARTBEAT_TOPIC);
+      break;
     }
     else
     {
@@ -124,13 +125,15 @@ void DO()
 
   averagedomgl = AverageDOmgl.get(); // Stores the average value
 
-  publish(do_heart, "DO", HEARTBEAT_TOPIC);
-  publish(averagedomgl, "DO", DO_TOPIC); // Sends DOmg/L Data to Broker
+  if (isnan(averagedomgl) != 0.00) // Checks Error Data Received
+  {
+    do_heart = 0;
+  }
+  else
+  {
+    AverageDOmgl.clear(); // Clears Average data
+  }
 
-  //publish(DOmgl, "DO", DO_TOPIC);             // Sends DOmg/L Data to Broker
-  publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
-
-  AverageDOmgl.clear(); // Clears Average data
 }
 
 void pH()
@@ -142,11 +145,9 @@ void pH()
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
 
-  for (byte i = 1; i <= 5; i++)
-  {
-    modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
-    delay(100);
-  }
+  modbusRead(3, pH_slaveID_DEC, 15, ph_temp); //Acquiring Data and saving into ph_temp
+  delay(100);
+
   if (ph_temp[0] != pH_slaveID_DEC) //Slave ID Check
   {
     //Serial.println("Slave ID not matched Transmission Halt!");
@@ -168,7 +169,4 @@ void pH()
   }
 
   delay(500);
-  publish(ph_heart, "pH", HEARTBEAT_TOPIC);
-  publish(ph_val, "pH", pH_TOPIC);
-  publish(ph_temperature, "Temperature", pH_TOPIC);
 }
