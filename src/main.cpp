@@ -129,4 +129,15 @@ void loop()
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
   delay(8000); //Waits 8 seconds
+
+  if(millis() >= 43200000)        // Resets the device in 12 hours
+  {
+    esp_restart();
+  }
+  else
+  {
+      //DO Nothing
+  }
+  
+
 }
