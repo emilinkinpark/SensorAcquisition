@@ -76,8 +76,7 @@ hw_timer_t *watchdogTimer = NULL;
 
 void IRAM_ATTR resetModule() //Resets on Watchdog
 {
-  //Serial.println("Resetting");
-  ets_printf("reboot\n");
+    ets_printf("reboot\n");
   esp_restart();
 }
 
@@ -99,7 +98,7 @@ void setup()
   mqtt_init();  // Initalise MQTT
 
   watchdogTimer = timerBegin(0, 80, true); //timer 0, div 80
-  timerAttachInterrupt(watchdogTimer, &resetModule, true);
+  timerAttachInterrupt(watchdogTimer, &resetModule, true);  // Does resetModule Function when watchdog hits
   timerAlarmWrite(watchdogTimer, 60000000, false); // Watchdog Time set in us; Default 60 seconds
   timerAlarmEnable(watchdogTimer);                 //enable interrupt
 
@@ -132,7 +131,7 @@ void loop()
 
   if(millis() >= 43200000)        // Resets the device in 12 hours
   {
-    esp_restart();
+   resetModule();
   }
   else
   {
