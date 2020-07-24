@@ -53,7 +53,7 @@ void DO()
 
   // Start Measurement
   modbusMasterTransmit(3, O2_slaveID, 0x03, 0x25, 0x00, 0x00, 0x01); //Serial2 used for Transceive Data
-  if (Serial2.read() > 0)
+  if (Serial2.available() > 0)
   {
     serial_flush_buffer(3); //Cleaning Response
     delay(100);
@@ -145,7 +145,7 @@ void pH()
   ph_heart = 0;
 
   modbusMasterTransmit(3, 0x01, 0x03, 0x00, 0x00, 0x00, 0x04); //Requesting ORP, pH, Temperature and Resistance
-  if (Serial2.read() > 0)
+  if (Serial2.available() > 0)
   {
     serial_flush_buffer(3); //Cleaning Response
     delay(100);

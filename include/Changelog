@@ -1,7 +1,12 @@
+24/07/2020:
+        Moving to AsyncMqttClient
+        WiFi.setup and wifi_check() removed;
+        QOS: 1 implemented; i.e. Data publish and receive acknowledge implemented;
+
 23/07/2020:
         Moving from PubSubClient to EclipsePaho for MQTT
         Better disconnect Detection Method implemented for Detection of DO and pH sensor 
-        QOS: 1 implemented to ensure better quality of service.
+        QOS: 0 implemented to ensure better quality of service.
 
 
 22/07/2020:

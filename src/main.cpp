@@ -44,44 +44,39 @@ void setup()
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
   
-
-  mqtt_topic_declaration();   // Initialises the MQTT Topics
-  setup_wifi(); // Setup WiFi
   mqtt_init();  // Initalise MQTT
 
-  watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
+ /*  watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
   timerAttachInterrupt(watchdogTimer, &resetModule, true); // Does resetModule Function when watchdog hits
   timerAlarmWrite(watchdogTimer, 30000000, false);         // Watchdog Time set in us; Default 30 seconds
   timerAlarmEnable(watchdogTimer);                         //enable interrupt
-
+ */
   //bmeInit(); // Initialising BME680 Dependencies
 }
 
 void loop()
 {
-  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
+  //timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
 
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
-  wifi_check();  // Checks connectivity
 
   
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
   DO(); //Measuring Dissolved Oxygen
 
-  //Serial.println("I'm out of DO");
+  Serial.println("I'm out of DO");
 
   pH(); //Measuring pH
 
-  //Serial.println("I'm out of pH");
+  Serial.println("I'm out of pH");
 
-  if (millis() >= 43200000) // Resets the device in 12 hours
+  if (millis() >= 7200000) // Resets the device in 2 hours
   {
     resetModule();
   }
   else
   {
     mqtt_send();          //Sends a bunch of data
-    
   }
 }
