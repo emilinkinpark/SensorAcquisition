@@ -6,7 +6,7 @@ TANK_3      192,168,0,16
 */
 
 //Topic Declaration12
-char tank_addr[8] = "TANK_1"; //Insert TANK Address
+char tank_addr[8] = "TANK_X"; //Insert TANK Address
 
 char HEARTBEAT_TOPIC[18];
 char DO_TOPIC[20];
