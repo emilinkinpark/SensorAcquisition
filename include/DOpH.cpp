@@ -26,8 +26,8 @@ float DO_Temp = 0.00;
 // pH variables
 boolean ph_heart = 0;
 //float ORP;            //Div by 10
-float ph_val;         //Div by 100
-float ph_temperature; // Div by 10
+float ph_val=0.00;         //Div by 100
+float ph_temperature=0.00; // Div by 10
 //int resitance;        // Div by 1
 
 void DO()
@@ -91,8 +91,6 @@ void DO()
       {
         do_heart = 0;                     //Sends out when DO Sensor Fails
         ets_printf("DO Sensor Failed\n"); // Reports error
-        publish(do_heart, "DO", HEARTBEAT_TOPIC);
-
         break;
       }
       else
@@ -120,22 +118,16 @@ void DO()
     }
     else
     {
-      publish(do_heart, "DO", HEARTBEAT_TOPIC);
-      publish(averagedomgl, "DO", DO_TOPIC);     // Sends average DOmg/L Data to Broker
-      publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
       AverageDOmgl.clear();                      // Clears Average data
     }
   }
   else
   {
     do_heart = 0;
-    publish(do_heart, "DO", HEARTBEAT_TOPIC);
-
     Serial.println("DO Sensor Not Detected");
     delay(1000);
   }
 
-  //Serial.println("Starting Measurement");
 }
 
 void pH()
@@ -163,15 +155,11 @@ void pH()
 
     //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
     ph_heart = 1;
-    publish(ph_heart, "pH", HEARTBEAT_TOPIC);
-    publish(ph_val, "pH", pH_TOPIC);
-    publish(ph_temperature, "Temperature", pH_TOPIC);
     delay(100);
   }
   else
   {
     ph_heart = 0;
-    publish(ph_heart, "pH", HEARTBEAT_TOPIC);
     Serial.println("pH Sensor Not Detected");
   }
 }

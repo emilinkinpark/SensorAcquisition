@@ -17,6 +17,7 @@ void mqtt_topic_declaration()
 
 void connectToWifi()
 {
+  WiFi.mode(WIFI_MODE_STA);
   Serial.println("Connecting to Wi-Fi...");
   WiFi.begin(ssid, pass);
   WiFi.setHostname(tank_addr);
@@ -43,7 +44,7 @@ void WiFiEvent(WiFiEvent_t event)
   case SYSTEM_EVENT_STA_DISCONNECTED:
     Serial.println("WiFi lost connection");
     xTimerStop(mqttReconnectTimer, 0); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
-    xTimerStart(wifiReconnectTimer, 0);
+    //xTimerStart(wifiReconnectTimer, 0);
     break;
   }
 }
@@ -58,7 +59,7 @@ void onMqttConnect(bool sessionPresent)
   //Serial.println(packetIdSub);
   //mqttClient.publish("test/lol", 0, true, "test 1");
   //Serial.println("Publishing at QoS 0");
-  uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
+  uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, false, "test 2");
   Serial.print("Publishing at QoS 1, packetId: ");
   Serial.println(packetIdPub1);
   //uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
@@ -138,7 +139,7 @@ void mqtt_init()
 {
   mqtt_topic_declaration();
   mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
-  wifiReconnectTimer = xTimerCreate("wifiTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToWifi));
+  //wifiReconnectTimer = xTimerCreate("wifiTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToWifi));
 
   WiFi.onEvent(WiFiEvent);
 
@@ -153,3 +154,4 @@ void mqtt_init()
 
   connectToWifi();
 }
+
