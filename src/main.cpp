@@ -16,7 +16,6 @@
 #include <esp_system.h>
 #include "DOpH.cpp"
 
-
 //Serial Pins Definition
 #define UART1_RX 4
 #define UART1_TX 2
@@ -43,40 +42,41 @@ void setup()
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
-  
-  mqtt_init();  // Initalise MQTT
 
- /*  watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
+  mqtt_init(); // Initalise MQTT
+
+  watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
   timerAttachInterrupt(watchdogTimer, &resetModule, true); // Does resetModule Function when watchdog hits
   timerAlarmWrite(watchdogTimer, 30000000, false);         // Watchdog Time set in us; Default 30 seconds
   timerAlarmEnable(watchdogTimer);                         //enable interrupt
- */
+
   //bmeInit(); // Initialising BME680 Dependencies
 }
 
 void loop()
 {
-  //timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
 
   heartbeat = 1; //Heartbeat = 1 marks the start of loop
 
-  
   publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-  DO(); //Measuring Dissolved Oxygen
-
-  Serial.println("I'm out of DO");
-
-  pH(); //Measuring pH
-
-  Serial.println("I'm out of pH");
-
-  if (millis() >= 7200000) // Resets the device in 2 hours
+  if (millis() >= 1800000) // Resets the device in 30 minutes
   {
     resetModule();
   }
-  else
-  {
-    mqtt_send();          //Sends a bunch of data
-  }
+
+  DO(); //Measuring Dissolved Oxygen
+
+  //Serial.println("I'm out of DO");
+
+  pH(); //Measuring pH
+
+  //Serial.println("I'm out of pH");
+  timerWrite(watchdogTimer, 0); //Resets Watchdog Timer
+ 
+  float wifi_strength = WiFi.RSSI();
+  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
+  heartbeat = 0;                                   //Heartbeat publishes 0 to mark end of transmission
+  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
+  delay(8000); //Waits 8 seconds
 }

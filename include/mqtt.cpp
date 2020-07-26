@@ -19,6 +19,8 @@ void connectToWifi()
 {
   Serial.println("Connecting to Wi-Fi...");
   WiFi.begin(ssid, pass);
+  WiFi.setHostname(tank_addr);
+  WiFi.setTxPower(WIFI_POWER_19_5dBm);
 }
 
 void connectToMqtt()
@@ -29,7 +31,7 @@ void connectToMqtt()
 
 void WiFiEvent(WiFiEvent_t event)
 {
-  Serial.printf("[WiFi-event] event: %d\n", event);
+  //Serial.printf("[WiFi-event] event: %d\n", event);
   switch (event)
   {
   case SYSTEM_EVENT_STA_GOT_IP:
@@ -52,16 +54,16 @@ void onMqttConnect(bool sessionPresent)
   Serial.print("Session present: ");
   Serial.println(sessionPresent);
   //uint16_t packetIdSub = mqttClient.subscribe("test/lol", 2);
-  Serial.print("Subscribing at QoS 2, packetId: ");
+  //Serial.print("Subscribing at QoS 2, packetId: ");
   //Serial.println(packetIdSub);
-  mqttClient.publish("test/lol", 0, true, "test 1");
-  Serial.println("Publishing at QoS 0");
+  //mqttClient.publish("test/lol", 0, true, "test 1");
+  //Serial.println("Publishing at QoS 0");
   uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
   Serial.print("Publishing at QoS 1, packetId: ");
   Serial.println(packetIdPub1);
-  uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
-  Serial.print("Publishing at QoS 2, packetId: ");
-  Serial.println(packetIdPub2);
+  //uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
+  //Serial.print("Publishing at QoS 2, packetId: ");
+  //Serial.println(packetIdPub2);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
@@ -129,7 +131,7 @@ void publish(float var, const char *tag, const char *publish_topic) // Easy Rout
   strcat(buf, "\:");
   strcat(buf, temp);
   strcat(buf, "}");
-  mqttClient.publish(publish_topic, 1, true, buf);
+  mqttClient.publish(publish_topic, 1, false, buf);
 }
 
 void mqtt_init()
@@ -150,14 +152,4 @@ void mqtt_init()
   mqttClient.setServer(MQTT_Broker_IP, 1883);
 
   connectToWifi();
-}
-
-void mqtt_send() // This part needs to be in loop
-{
-
-  float wifi_strength = WiFi.RSSI();
-  publish(wifi_strength, "WiFi_RSSI", HEARTBEAT_TOPIC); // Sends out WiFi AP Signal Strength
-  byte heartbeat = 0;                                   //Heartbeat publishes 0 to mark end of transmission
-  publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
-  delay(8000); //Waits 8 seconds
 }
