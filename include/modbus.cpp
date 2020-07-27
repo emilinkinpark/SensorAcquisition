@@ -128,7 +128,7 @@ void modbusMasterTransmit(uint8_t const serialportnumber, uint8_t slave_addr, ui
 
   //  01                03                               25                                   00                                00                      01
 
-  delay(200);                           // delay stop mixing up sent data during flash
+  vTaskDelay(200/portTICK_PERIOD_MS);                           // delay stop mixing up sent data during flash
   uint16_t CRC = crc16(data_stream, 6); //Generating CRC //Length Must be 6
   // Serial.println("Transmitting Start"); //Debugging
 
@@ -209,7 +209,7 @@ void modbusSlaveTransmit(uint8_t const serialportnumber, uint8_t slave_addr, uin
 
   //  01                03                               25                                   00                                00                      01
 
-  delay(200);                           // delay stop mixing up sent data during flash
+  vTaskDelay(200/portTICK_PERIOD_MS);                           // delay stop mixing up sent data during flash
   uint16_t CRC = crc16(data_stream, 7); //Generating CRC //Length Must be 6
   // uint8_t CRC_HIGH = (CRC>>8);
   // uint8_t CRC_LOW = CRC;

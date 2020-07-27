@@ -56,14 +56,14 @@ void DO()
   if (Serial2.available() > 0)
   {
     serial_flush_buffer(3); //Cleaning Response
-    delay(100);
+    vTaskDelay(100/portTICK_PERIOD_MS);
 
     for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
     {
       modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
 
       modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
-      delay(100);
+      vTaskDelay(100/portTICK_PERIOD_MS);
 
       //Serial.println("Data Acquired");
 
@@ -84,7 +84,7 @@ void DO()
           serial_flush_buffer(3); //Cleaning Response
         }
         DOfaultstatus++; // DOfaultstatus increment
-        delay(1000);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
       }
       else
       {
@@ -128,7 +128,7 @@ void DO()
   {
     do_heart = 0;
     Serial.println("DO Sensor Not Detected");
-    delay(1000);
+    vTaskDelay(1000/portTICK_PERIOD_MS);
   }
 }
 
@@ -157,7 +157,7 @@ void pH()
 
     //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
     ph_heart = 1;
-    delay(100);
+    vTaskDelay(100/portTICK_PERIOD_MS);
   }
   else
   {

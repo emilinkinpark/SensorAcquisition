@@ -28,6 +28,11 @@ byte heartbeat = 0;
 
 void keepWiFiAlive(void *pvParameters)
 {
+  mqtt_init(); // Initalise MQTT
+/* 
+  UBaseType_t uxHighWaterMark;
+  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
+
   for (;;)
   {
     if (WiFi.status() == WL_CONNECTED)
@@ -58,11 +63,18 @@ void keepWiFiAlive(void *pvParameters)
     }
 
     Serial.println("[WIFI] Connected: " + WiFi.localIP());
+    /* Serial.print("keepWiFiAlive Used Space: ");
+    Serial.println(uxHighWaterMark); */
   }
 }
 
-void mqttpublish(void *pvParameters)
+void mqttPublish(void *pvParameters)
 {
+  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+/* 
+  UBaseType_t uxHighWaterMark;
+  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
+
   for (;;)
   {
     heartbeat = 1; //Heartbeat = 1 marks the start of loop
@@ -86,7 +98,9 @@ void mqttpublish(void *pvParameters)
     heartbeat = 0;                                        //Heartbeat publishes 0 to mark end of transmission
     publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    delay(8000); //Waits 8 seconds
+    vTaskDelay(8000 / portTICK_PERIOD_MS); //Waits 8 seconds
+    /* Serial.print("mqttPublish Used Space: ");
+    Serial.println(uxHighWaterMark); */
   }
 }
 
@@ -99,21 +113,12 @@ void setup()
   //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
-  mqtt_init(); // Initalise MQTT
-
-  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
-
-  /* watchdogTimer = timerBegin(0, 80, true);                 //timer 0, div 80
-  timerAttachInterrupt(watchdogTimer, &resetModule, true); // Does resetModule Function when watchdog hits
-  timerAlarmWrite(watchdogTimer, 30000000, false);         // Watchdog Time set in us; Default 30 seconds
-  timerAlarmEnable(watchdogTimer);                         //enable interrupt
- */
   //bmeInit(); // Initialising BME680 Dependencies
 
   xTaskCreatePinnedToCore(
       keepWiFiAlive,
       "keepWiFiAlive", // Task name
-      5000,            // Stack size (bytes)
+      2000,            // Stack size (bytes)
       NULL,            // Parameter
       2,               // Task priority
       NULL,            // Task handle
@@ -121,9 +126,9 @@ void setup()
   );
 
   xTaskCreatePinnedToCore(
-      mqttpublish,
-      "mqttpublish", // Task name
-      5000,          // Stack size (bytes)
+      mqttPublish,
+      "mqttPublish", // Task name
+      1000,          // Stack size (bytes)
       NULL,          // Parameter
       1,             // Task priority
       NULL,          // Task handle
@@ -133,8 +138,5 @@ void setup()
 
 void loop()
 {
-  /* if (millis() >= 60000) //1800000) // Resets the device in 30 minutes
-  {
-    resetModule();
-  } */
+  /////// Empty Forever ///////
 }

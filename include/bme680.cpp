@@ -52,29 +52,19 @@ void bmeRun()
   ambient_pressure = bme.pressure / 100.0;
   ambient_humidity = bme.humidity;
   ambient_altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+  /*
+ //Debugging Start
 
-  // //Debugging Start
+  Serial.print("Temperature = "); Serial.print(air_temp); Serial.println(" °C");
 
-  // Serial.print("Temperature = ");
-  // Serial.print(air_temp);
-  // Serial.println(" *C");
+  Serial.print("Pressure = "); Serial.print(ambient_pressure); Serial.println(" hPa");
 
-  // Serial.print("Pressure = ");
-  // Serial.print(ambient_pressure);
-  // Serial.println(" hPa");
+  Serial.print("Humidity = ");Serial.print(ambient_humidity); Serial.println(" %");
 
-  // Serial.print("Humidity = ");
-  // Serial.print(ambient_humidity);
-  // Serial.println(" %");
+  // Serial.print("Gas = "); Serial.print(bme.gas_resistance / 1000.0); // Serial.println(" KOhms");
 
-  // // Serial.print("Gas = ");
-  // // Serial.print(bme.gas_resistance / 1000.0);
-  // // Serial.println(" KOhms");
-
-  // Serial.print("Approx. Altitude = ");
-  // Serial.print(ambient_altitude);
-  // Serial.println(" m");
-  // Serial.println();
-  // //Debugging End
-  delay(2000);
+  Serial.print("Approx. Altitude = "); Serial.print(ambient_altitude); Serial.println(" m"); Serial.println();
+  //Debugging End
+  */
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
 }
