@@ -26,8 +26,8 @@ float DO_Temp = 0.00;
 // pH variables
 boolean ph_heart = 0;
 //float ORP;            //Div by 10
-float ph_val=0.00;         //Div by 100
-float ph_temperature=0.00; // Div by 10
+float ph_val = 0.00;         //Div by 100
+float ph_temperature = 0.00; // Div by 10
 //int resitance;        // Div by 1
 
 void DO()
@@ -79,6 +79,10 @@ void DO()
       if (isnan(DOmgl) != 0.00) // Checks Error Data Received
       {
         count = count - 1;
+        if (Serial2.available() > 0)
+        {
+          serial_flush_buffer(3); //Cleaning Response
+        }
         DOfaultstatus++; // DOfaultstatus increment
         delay(1000);
       }
@@ -102,7 +106,7 @@ void DO()
     // Stop Measurement
     modbusMasterTransmit(3, O2_slaveID, 0x03, 0x2E, 0x00, 0x00, 0x01);
 
-    if (Serial2.available())
+    if (Serial2.available() > 0)
     {
       serial_flush_buffer(3); //Cleaning Response
     }
@@ -114,11 +118,10 @@ void DO()
     if (isnan(averagedomgl) != 0.00) // Checks Error Data Received
     {
       do_heart = 0;
-      publish(do_heart, "DO", HEARTBEAT_TOPIC);
     }
     else
     {
-      AverageDOmgl.clear();                      // Clears Average data
+      AverageDOmgl.clear(); // Clears Average data
     }
   }
   else
@@ -127,7 +130,6 @@ void DO()
     Serial.println("DO Sensor Not Detected");
     delay(1000);
   }
-
 }
 
 void pH()
