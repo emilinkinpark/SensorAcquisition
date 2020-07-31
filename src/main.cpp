@@ -25,7 +25,7 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
-#define ESP32_RTOS  // OTA dependency
+#define ESP32_RTOS // OTA dependency
 
 unsigned long entry; // OTA dependency
 
@@ -48,7 +48,7 @@ void keepWiFiAlive(void *pvParameters)
       vTaskDelay(10000 / portTICK_PERIOD_MS);
       continue;
     }
-/* 
+    /* 
     Serial.println("[WIFI] Connecting");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
@@ -83,7 +83,7 @@ void mqttPublish(void *pvParameters)
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
-                                            
+
   for (;;)
   {
     heartbeat = 1; //Heartbeat = 1 marks the start of loop
@@ -93,10 +93,12 @@ void mqttPublish(void *pvParameters)
     DO();
     //DO
     publish(do_heart, "DO", HEARTBEAT_TOPIC);
+
     if (averagedomgl != 0.00)
     {
       publish(averagedomgl, "DO", DO_TOPIC); // Sends average DOmg/L Data to Broker
     }
+
     publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);

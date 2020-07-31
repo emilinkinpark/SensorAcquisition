@@ -31,7 +31,7 @@ void setupOTA(const char* nameprefix) {
   
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
-  //WiFi.setHostname(tank_addr);
+  WiFi.setHostname(tank_addr);
   WiFi.setTxPower(WIFI_POWER_19_5dBm);
   
   /* while (WiFi.waitForConnectResult() != WL_CONNECTED) {
