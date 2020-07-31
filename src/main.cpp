@@ -91,6 +91,7 @@ void mqttPublish(void *pvParameters)
     }
     publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     pH(); //Measuring pH
     //pH
     publish(ph_heart, "pH", HEARTBEAT_TOPIC);
