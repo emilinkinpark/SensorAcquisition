@@ -86,7 +86,9 @@ void mqttPublish(void *pvParameters)
     DO();
     //DO
     publish(do_heart, "DO", HEARTBEAT_TOPIC);
-    publish(averagedomgl, "DO", DO_TOPIC);     // Sends average DOmg/L Data to Broker
+    if(averagedomgl != 0.00){
+      publish(averagedomgl, "DO", DO_TOPIC);     // Sends average DOmg/L Data to Broker
+    }
     publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
     pH(); //Measuring pH
