@@ -58,8 +58,7 @@ void keepWiFiAlive(void *pvParameters)
     unsigned long startAttemptTime = millis();
 
     // Keep looping while we're not connected and haven't reached the timeout
-    while (WiFi.status() != WL_CONNECTED &&
-           millis() - startAttemptTime < 10000)
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000)
     {
     }
 
@@ -83,6 +82,13 @@ void mqttPublish(void *pvParameters)
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+
+  //pH Calibration
+  /* modbusMasterTransmit(3,0x01,0x06,0x00,0x05,0x03,0x32);
+  if (Serial2.available() > 0)
+    {
+      serial_flush_buffer(3); //Cleaning Response
+    } */
 
   for (;;)
   {
@@ -113,7 +119,7 @@ void mqttPublish(void *pvParameters)
     heartbeat = 0;                                        //Heartbeat publishes 0 to mark end of transmission
     publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    vTaskDelay(8000 / portTICK_PERIOD_MS); //Waits 8 seconds
+    vTaskDelay(10000 / portTICK_PERIOD_MS); //Waits 8 seconds
     /* Serial.print("mqttPublish Used Space: ");
     Serial.println(uxHighWaterMark); */
   }
@@ -128,10 +134,10 @@ void ota_handle(void *pvParameters)
     entry = micros();
 
     ArduinoOTA.handle();
-
+    
     TelnetStream.println(micros() - entry);
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+   // vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -148,25 +154,25 @@ void setup()
       1                // Run on Core 1
   );
 
-  xTaskCreatePinnedToCore(
-      mqttPublish,
-      "mqttPublish", // Task name
-      1000,          // Stack size (bytes)
-      NULL,          // Parameter
-      2,             // Task priority
-      NULL,          // Task handle
-      1              // Run on Core 1
-  );
 
   xTaskCreatePinnedToCore(
       ota_handle,   /* Task function. */
       "OTA_HANDLE", /* String with name of task. */
       10000,        /* Stack size in bytes. */
       NULL,         /* Parameter passed as input of the task */
-      3,            /* Priority of the task. */
+      2,            /* Priority of the task. */
       NULL,
       1); /* Task handle. */
 
+   xTaskCreatePinnedToCore(
+      mqttPublish,
+      "mqttPublish", // Task name
+      1000,          // Stack size (bytes)
+      NULL,          // Parameter
+      3,             // Task priority
+      NULL,          // Task handle
+      1              // Run on Core 1
+  );
   Serial.begin(9600); //TXD0 - used as serial decorder
 
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
