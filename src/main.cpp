@@ -29,7 +29,7 @@ byte heartbeat = 0;
 void keepWiFiAlive(void *pvParameters)
 {
   mqtt_init(); // Initalise MQTT
-/* 
+               /* 
   UBaseType_t uxHighWaterMark;
   uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
 
@@ -44,6 +44,8 @@ void keepWiFiAlive(void *pvParameters)
     Serial.println("[WIFI] Connecting");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
+    WiFi.setHostname(tank_addr);
+    WiFi.setTxPower(WIFI_POWER_19_5dBm);
 
     unsigned long startAttemptTime = millis();
 
@@ -71,7 +73,7 @@ void keepWiFiAlive(void *pvParameters)
 void mqttPublish(void *pvParameters)
 {
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
-/* 
+                                           /* 
   UBaseType_t uxHighWaterMark;
   uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
 

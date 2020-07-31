@@ -15,14 +15,6 @@ void mqtt_topic_declaration()
   strcat(pH_TOPIC, "/DATA/LT1729D"); //TANK_x/DATA/LT1729D  20 characters
 }
 
-void connectToWifi()
-{
-  WiFi.mode(WIFI_MODE_STA);
-  Serial.println("Connecting to Wi-Fi...");
-  WiFi.begin(ssid, pass);
-  WiFi.setHostname(tank_addr);
-  WiFi.setTxPower(WIFI_POWER_19_5dBm);
-}
 
 void connectToMqtt()
 {
@@ -152,6 +144,6 @@ void mqtt_init()
   mqttClient.setClientId(tank_addr);
   mqttClient.setServer(MQTT_Broker_IP, 1883);
 
-  connectToWifi();
+  //connectToWifi();
 }
 
