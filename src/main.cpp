@@ -11,10 +11,13 @@
 *   The field slave devices talks back to ESP32 (Master) over RS485 Modbus.
 *   The data is taken in and send to MQTT Broker over Wifi
 *   
+*   Dedicated to Tyler Goodwin, the mate that influenced me to join the software side;
+*   
 */
 
 #include <esp_system.h>
 #include "DOpH.cpp"
+#include "OTA.h"
 
 //Serial Pins Definition
 #define UART1_RX 4
@@ -22,12 +25,17 @@
 #define UART2_RX 16
 #define UART2_TX 17
 
+#define ESP32_RTOS  // OTA dependency
+
+unsigned long entry; // OTA dependency
+
 byte heartbeat = 0;
 
 //hw_timer_t *watchdogTimer = NULL;
 
 void keepWiFiAlive(void *pvParameters)
 {
+
   mqtt_init(); // Initalise MQTT
                /* 
   UBaseType_t uxHighWaterMark;
@@ -40,12 +48,12 @@ void keepWiFiAlive(void *pvParameters)
       vTaskDelay(10000 / portTICK_PERIOD_MS);
       continue;
     }
-
+/* 
     Serial.println("[WIFI] Connecting");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     WiFi.setHostname(tank_addr);
-    WiFi.setTxPower(WIFI_POWER_19_5dBm);
+    WiFi.setTxPower(WIFI_POWER_19_5dBm); */
 
     unsigned long startAttemptTime = millis();
 
@@ -72,11 +80,10 @@ void keepWiFiAlive(void *pvParameters)
 
 void mqttPublish(void *pvParameters)
 {
-  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
-                                           /* 
-  UBaseType_t uxHighWaterMark;
-  uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
+  Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
+  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+                                            
   for (;;)
   {
     heartbeat = 1; //Heartbeat = 1 marks the start of loop
@@ -86,12 +93,13 @@ void mqttPublish(void *pvParameters)
     DO();
     //DO
     publish(do_heart, "DO", HEARTBEAT_TOPIC);
-    if(averagedomgl != 0.00){
-      publish(averagedomgl, "DO", DO_TOPIC);     // Sends average DOmg/L Data to Broker
+    if (averagedomgl != 0.00)
+    {
+      publish(averagedomgl, "DO", DO_TOPIC); // Sends average DOmg/L Data to Broker
     }
     publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     pH(); //Measuring pH
     //pH
     publish(ph_heart, "pH", HEARTBEAT_TOPIC);
@@ -109,23 +117,31 @@ void mqttPublish(void *pvParameters)
   }
 }
 
+void ota_handle(void *pvParameters)
+{
+  setupOTA(tank_addr);
+
+  for (;;)
+  {
+    entry = micros();
+
+    ArduinoOTA.handle();
+
+    TelnetStream.println(micros() - entry);
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+}
+
 void setup()
 {
-
-  Serial.begin(9600); //TXD0 - used as serial decorder
-
-  //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
-  //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
-  Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
-
-  //bmeInit(); // Initialising BME680 Dependencies
 
   xTaskCreatePinnedToCore(
       keepWiFiAlive,
       "keepWiFiAlive", // Task name
       2000,            // Stack size (bytes)
       NULL,            // Parameter
-      2,               // Task priority
+      1,               // Task priority
       NULL,            // Task handle
       1                // Run on Core 1
   );
@@ -135,13 +151,27 @@ void setup()
       "mqttPublish", // Task name
       1000,          // Stack size (bytes)
       NULL,          // Parameter
-      1,             // Task priority
+      2,             // Task priority
       NULL,          // Task handle
       1              // Run on Core 1
   );
+
+  xTaskCreatePinnedToCore(
+      ota_handle,   /* Task function. */
+      "OTA_HANDLE", /* String with name of task. */
+      10000,        /* Stack size in bytes. */
+      NULL,         /* Parameter passed as input of the task */
+      3,            /* Priority of the task. */
+      NULL,
+      1); /* Task handle. */
+
+  Serial.begin(9600); //TXD0 - used as serial decorder
+
+  //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
+  //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
 }
 
 void loop()
 {
-  /////// Empty Forever ///////
+  //
 }
