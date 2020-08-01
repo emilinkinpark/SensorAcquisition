@@ -1,26 +1,36 @@
+31/07/2020:
+        OTA implemented on freeRTOS;
+        Reconnect with OTA enabled;
+        Guard placed against vaue 0.00 when Sensor fault;
+        Task priority changed;
+        Delay changed to vTaskDelay for better compatible with freeRTOS;
+        library dependencies added to platformio.ini;
+        pH Calibration modbus protocol added;
+        Code Clean up;
+        vTaskDelay added between DO() and pH() 
 26/07/2020:
-        Code mode to freeRTOS
-        Delay changed to vTaskDelay
-        Serial Flush added if Sensor Fails
+        Code mode to freeRTOS;
+        Delay changed to vTaskDelay;
+        Serial Flush added if Sensor Fails;
 24/07/2020:
-        Moving to AsyncMqttClient
+        Moving to AsyncMqttClient;
         WiFi.setup and wifi_check() removed;
         QOS: 1 implemented; i.e. Data publish and receive acknowledge implemented;
 
 23/07/2020:
-        Moving from PubSubClient to EclipsePaho for MQTT
-        Better disconnect Detection Method implemented for Detection of DO and pH sensor 
-        QOS: 0 implemented to ensure better quality of service.
+        Moving from PubSubClient to EclipsePaho for MQTT;
+        Better disconnect Detection Method implemented for Detection of DO and pH sensor; 
+        QOS: 0 implemented to ensure better quality of service;
 
 
 22/07/2020:
-        A lot function removed.
-        wifi_check() added; WiFi reconnect working perfectly along with MQTT reconnect.
-        WiFi Transmit Power Set to max.
-        Main loop delay changed from 5000ms to 8000ms
+        A lot function removed;
+        wifi_check() added; WiFi reconnect working perfectly along with MQTT reconnect;
+        WiFi Transmit Power Set to max;
+        Main loop delay changed from 5000ms to 8000ms;
 
 20/07/2020:
-        Added condition to check serial available for serial flushing.
+        /Added condition to check serial available for serial flushing./
         Wifi condition set and moved back to mqtt.h
 18/07/2020:
 mqtt.cpp:

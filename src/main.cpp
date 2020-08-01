@@ -85,8 +85,6 @@ void ota_handle(void *pvParameters)
     ArduinoOTA.handle();
 
     TelnetStream.println(micros() - entry);
-
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -124,6 +122,7 @@ void mqttPublish(void *pvParameters)
     publish(DO_Temp, "Temperature", DO_TOPIC); // Sends DO_Temp Data to Broker
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
+
     pH(); //Measuring pH
     //pH
     publish(ph_heart, "pH", HEARTBEAT_TOPIC);
@@ -155,7 +154,7 @@ void setup()
       NULL,
       1); /* Task handle. */
 
-    xTaskCreatePinnedToCore(
+  xTaskCreatePinnedToCore(
       keepWiFiAlive,
       "keepWiFiAlive", // Task name
       2000,            // Stack size (bytes)
