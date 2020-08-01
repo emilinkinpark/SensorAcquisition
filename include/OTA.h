@@ -29,18 +29,11 @@ void setupOTA(const char* nameprefix) {
   snprintf(fullhostname, maxlen, "%s-%02x%02x%02x", nameprefix, mac[3], mac[4], mac[5]);
   ArduinoOTA.setHostname(fullhostname);
   
-  WiFi.mode(WIFI_STA);
+  /* WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
   WiFi.setHostname(tank_addr);
-  WiFi.setTxPower(WIFI_POWER_19_5dBm);
+  WiFi.setTxPower(WIFI_POWER_19_5dBm); */
   
-  /* while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Connection Failed! Rebooting...");
-    vTaskDelay(5000/portTICK_PERIOD_MS);
-    ESP.restart();
-  } */
-
-  // Port defaults to 3232
    ArduinoOTA.setPort(3232);
 
   // No authentication by default
@@ -83,14 +76,4 @@ void setupOTA(const char* nameprefix) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-#if defined(ESP32_RTOS) && defined(ESP32)
-  xTaskCreate(
-    ota_handle,          /* Task function. */
-    "OTA_HANDLE",        /* String with name of task. */
-    10000,            /* Stack size in bytes. */
-    NULL,             /* Parameter passed as input of the task */
-    3,                /* Priority of the task. */
-    NULL,
-    1);            /* Task handle. */
-#endif
 }

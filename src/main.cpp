@@ -35,9 +35,7 @@ byte heartbeat = 0;
 
 void keepWiFiAlive(void *pvParameters)
 {
-
-  mqtt_init(); // Initalise MQTT
-               /* 
+  /* 
   UBaseType_t uxHighWaterMark;
   uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL); */
 
@@ -48,12 +46,12 @@ void keepWiFiAlive(void *pvParameters)
       vTaskDelay(10000 / portTICK_PERIOD_MS);
       continue;
     }
-    /* 
+
     Serial.println("[WIFI] Connecting");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     WiFi.setHostname(tank_addr);
-    WiFi.setTxPower(WIFI_POWER_19_5dBm); */
+    WiFi.setTxPower(WIFI_POWER_19_5dBm);
 
     unsigned long startAttemptTime = millis();
 
@@ -67,7 +65,7 @@ void keepWiFiAlive(void *pvParameters)
     if (WiFi.status() != WL_CONNECTED)
     {
       Serial.println("[WIFI] FAILED");
-      vTaskDelay(20000 / portTICK_PERIOD_MS);
+      vTaskDelay(30000 / portTICK_PERIOD_MS);
       continue;
     }
 
@@ -77,11 +75,28 @@ void keepWiFiAlive(void *pvParameters)
   }
 }
 
+void ota_handle(void *pvParameters)
+{
+  setupOTA(tank_addr);
+
+  for (;;)
+  {
+    entry = micros();
+    ArduinoOTA.handle();
+
+    TelnetStream.println(micros() - entry);
+
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
 void mqttPublish(void *pvParameters)
 {
   Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
+
+  mqtt_init(); // Initalise MQTT
 
   //pH Calibration
   /* modbusMasterTransmit(3,0x01,0x06,0x00,0x05,0x03,0x32);
@@ -92,6 +107,7 @@ void mqttPublish(void *pvParameters)
 
   for (;;)
   {
+
     heartbeat = 1; //Heartbeat = 1 marks the start of loop
 
     publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
@@ -125,46 +141,31 @@ void mqttPublish(void *pvParameters)
   }
 }
 
-void ota_handle(void *pvParameters)
-{
-  setupOTA(tank_addr);
-
-  for (;;)
-  {
-    entry = micros();
-
-    ArduinoOTA.handle();
-    
-    TelnetStream.println(micros() - entry);
-
-   // vTaskDelay(500 / portTICK_PERIOD_MS);
-  }
-}
-
 void setup()
 {
 
-  xTaskCreatePinnedToCore(
-      keepWiFiAlive,
-      "keepWiFiAlive", // Task name
-      2000,            // Stack size (bytes)
-      NULL,            // Parameter
-      1,               // Task priority
-      NULL,            // Task handle
-      1                // Run on Core 1
-  );
-
+  Serial.begin(9600); //TXD0 - used as serial decorder
 
   xTaskCreatePinnedToCore(
       ota_handle,   /* Task function. */
       "OTA_HANDLE", /* String with name of task. */
       10000,        /* Stack size in bytes. */
       NULL,         /* Parameter passed as input of the task */
-      2,            /* Priority of the task. */
+      1,            /* Priority of the task. */
       NULL,
       1); /* Task handle. */
 
-   xTaskCreatePinnedToCore(
+    xTaskCreatePinnedToCore(
+      keepWiFiAlive,
+      "keepWiFiAlive", // Task name
+      2000,            // Stack size (bytes)
+      NULL,            // Parameter
+      2,               // Task priority
+      NULL,            // Task handle
+      1                // Run on Core 1
+  );
+
+  xTaskCreatePinnedToCore(
       mqttPublish,
       "mqttPublish", // Task name
       1000,          // Stack size (bytes)
@@ -173,7 +174,6 @@ void setup()
       NULL,          // Task handle
       1              // Run on Core 1
   );
-  Serial.begin(9600); //TXD0 - used as serial decorder
 
   //Serial1.begin(9600, SERIAL_8N1, UART1_RX, UART1_TX);
   //Caution: Remove Pins before uploading firmware!!!!! // Shared with Flash
@@ -181,5 +181,5 @@ void setup()
 
 void loop()
 {
-  //
+  //KISS - Keep it Super Simple
 }
