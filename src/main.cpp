@@ -97,7 +97,7 @@ void mqttPublish(void *pvParameters)
   mqtt_init(); // Initalise MQTT
 
   //pH Calibration
-  /* modbusMasterTransmit(3,0x01,0x06,0x00,0x05,0x03,0x32);
+ /*  modbusMasterTransmit(3,0x01,0x06,0x00,0x05,0x03,0x26);
   if (Serial2.available() > 0)
     {
       serial_flush_buffer(3); //Cleaning Response
@@ -134,7 +134,7 @@ void mqttPublish(void *pvParameters)
     heartbeat = 0;                                        //Heartbeat publishes 0 to mark end of transmission
     publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    vTaskDelay(10000 / portTICK_PERIOD_MS); //Waits 8 seconds
+    vTaskDelay(20000 / portTICK_PERIOD_MS); //Waits 20 seconds
     /* Serial.print("mqttPublish Used Space: ");
     Serial.println(uxHighWaterMark); */
   }
