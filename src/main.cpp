@@ -90,18 +90,18 @@ void ota_handle(void *pvParameters)
 
 void mqttPublish(void *pvParameters)
 {
-  Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX);
+  Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX); //RX - Green //TX- White
 
   AverageDOmgl.begin(SMOOTHED_AVERAGE, 9); //Initialising Average class
 
   mqtt_init(); // Initalise MQTT
 
   //pH Calibration
- /*  modbusMasterTransmit(3,0x01,0x06,0x00,0x05,0x03,0x26);
+  /* modbusMasterTransmit(3, 0x01, 0x06, 0x00, 0x05, 0x03, 0x5C);
   if (Serial2.available() > 0)
-    {
-      serial_flush_buffer(3); //Cleaning Response
-    } */
+  {
+    serial_flush_buffer(3); //Cleaning Response
+  } */
 
   for (;;)
   {
@@ -110,8 +110,9 @@ void mqttPublish(void *pvParameters)
 
     publish(heartbeat, "ESP32", HEARTBEAT_TOPIC);
 
-    DO();
     //DO
+    DO();
+
     publish(do_heart, "DO", HEARTBEAT_TOPIC);
 
     if (averagedomgl != 0.00)
