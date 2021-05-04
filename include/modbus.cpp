@@ -1,6 +1,7 @@
 /* Dependent Headers */
 #include <Arduino.h>
 
+
 /* Dependent Variables */
 
 //char buff[20]; //Stores Serial Read Data
@@ -97,7 +98,7 @@ void serial_flush_buffer(uint8_t serialportnumber)
     {
       ; // do
     }
-  break;
+    break;
   case 2:
     while (Serial1.read() >= 0)
     {
@@ -128,7 +129,7 @@ void modbusMasterTransmit(uint8_t const serialportnumber, uint8_t slave_addr, ui
 
   //  01                03                               25                                   00                                00                      01
 
-  vTaskDelay(200/portTICK_PERIOD_MS);                           // delay stop mixing up sent data during flash
+  vTaskDelay(200 / portTICK_PERIOD_MS); // delay stop mixing up sent data during flash
   uint16_t CRC = crc16(data_stream, 6); //Generating CRC //Length Must be 6
   // Serial.println("Transmitting Start"); //Debugging
 
@@ -150,19 +151,19 @@ void modbusMasterTransmit(uint8_t const serialportnumber, uint8_t slave_addr, ui
     break;
 
   case 2: //Serial1
-      //       //Serial.println("Case 2");
-      // for (int i = 0; i <= 7; i++)
-      // {
-      //   Serial1.write(data_stream[i]); //Sending out the data
-      //   //delay(50);
-      //   Serial.write("Data: ");
-      //   Serial.println(i);
-      //   Serial.println(data_stream[i], HEX);
-      // }
-      // //CRC_LOW = CRC;
-      // //Serial1.write(CRC >> 8); //Sending Upper CRC bits i.e High bits
-      // //Serial.println(CRC>>8,HEX);
-      // //Serial1.write(CRC_LOW);      //Sending Lower CRC bits
+          //       //Serial.println("Case 2");
+          // for (int i = 0; i <= 7; i++)
+          // {
+          //   Serial1.write(data_stream[i]); //Sending out the data
+          //   //delay(50);
+          //   Serial.write("Data: ");
+          //   Serial.println(i);
+          //   Serial.println(data_stream[i], HEX);
+          // }
+          // //CRC_LOW = CRC;
+          // //Serial1.write(CRC >> 8); //Sending Upper CRC bits i.e High bits
+          // //Serial.println(CRC>>8,HEX);
+          // //Serial1.write(CRC_LOW);      //Sending Lower CRC bits
 
     // //Serial.println(CRC_LOW,HEX);
     // break;
@@ -209,7 +210,7 @@ void modbusSlaveTransmit(uint8_t const serialportnumber, uint8_t slave_addr, uin
 
   //  01                03                               25                                   00                                00                      01
 
-  vTaskDelay(200/portTICK_PERIOD_MS);                           // delay stop mixing up sent data during flash
+  vTaskDelay(200 / portTICK_PERIOD_MS); // delay stop mixing up sent data during flash
   uint16_t CRC = crc16(data_stream, 7); //Generating CRC //Length Must be 6
   // uint8_t CRC_HIGH = (CRC>>8);
   // uint8_t CRC_LOW = CRC;
@@ -427,7 +428,7 @@ void modbusRead(uint8_t serialportnumber, char SlaveID, int datalength, int *buf
       {
         if (Serial2.available())
         {
-        serial_flush_buffer(3);
+          serial_flush_buffer(3);
         }
       }
       else
@@ -437,8 +438,8 @@ void modbusRead(uint8_t serialportnumber, char SlaveID, int datalength, int *buf
       }
       //Serial.println("End of Loop");    //Debugging
     }
-  //Serial.println("Read Complete");    //Debugging
-   //End of Switch
+    //Serial.println("Read Complete");    //Debugging
+    //End of Switch
   }
 }
 

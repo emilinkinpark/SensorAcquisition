@@ -3,13 +3,19 @@
 
 #include "modbus.cpp"
 #include "conversions.cpp"
-#include "mqtt.cpp"
+//#include "mqtt.cpp"
 
 #include <Smoothed.h>
 
 Smoothed<float> AverageDOmgl;
 
 float averagedomgl = 0.00;
+
+//Serial Pins Definition
+#define UART1_RX 4
+#define UART1_TX 2
+#define UART2_RX 16
+#define UART2_TX 17
 
 // DO sensor ID
 #define O2_slaveID 0x0E
@@ -19,16 +25,25 @@ float averagedomgl = 0.00;
 #define pH_slaveID_DEC 1
 
 // DO variables
-boolean do_heart = 0;
+boolean doHeart = 0;
 float DOmgl = 0.00;
-float DO_Temp = 0.00;
+float doTemp = 0.00;
 
+/* // Deprecated in 2021 versions
 // pH variables
 boolean ph_heart = 0;
 //float ORP;            //Div by 10
 float ph_val = 0.00;         //Div by 100
 float ph_temperature = 0.00; // Div by 10
 //int resitance;        // Div by 1
+*/
+
+
+void doInit()
+{
+  Serial2.begin(9600, SERIAL_8N1, UART2_RX, UART2_TX); //RX - Green //TX- White
+  AverageDOmgl.begin(SMOOTHED_AVERAGE, 9);             //Initialising Average class
+}
 
 void DO()
 {
@@ -56,25 +71,25 @@ void DO()
   if (Serial2.available() > 0)
   {
     serial_flush_buffer(3); //Cleaning Response
-    vTaskDelay(100/portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     for (byte count = 0; count <= 10; count++) // Receiving DO data 10 times and averaging
     {
       modbusMasterTransmit(3, O2_slaveID, 0x03, 0x26, 0x00, 0x00, 0x04); // Request Data Block from Sensor
 
       modbusRead(3, O2_slaveID_DEC, 13, o2); //Acquiring Data and saving into o2
-      vTaskDelay(100/portTICK_PERIOD_MS);
+      vTaskDelay(100 / portTICK_PERIOD_MS);
 
       //Serial.println("Data Acquired");
 
-      DO_Temp = floatTOdecimal(o2[3], o2[4], o2[5], o2[6]);
+      doTemp = floatTOdecimal(o2[3], o2[4], o2[5], o2[6]);
       //float Temp_Manipulation = Conv_Temp * 100;
       //Temp_Send = Temp_Manipulation;
 
       float Conv_DOPerc = floatTOdecimal(o2[7], o2[8], o2[9], o2[10]);
       memset(o2, 0, sizeof(o2)); //Empties array
 
-      DOmgl = domglcalc(DO_Temp, Conv_DOPerc);
+      DOmgl = domglcalc(doTemp, Conv_DOPerc);
 
       if (isnan(DOmgl) != 0.00) // Checks Error Data Received
       {
@@ -84,7 +99,7 @@ void DO()
           serial_flush_buffer(3); //Cleaning Response
         }
         DOfaultstatus++; // DOfaultstatus increment
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
       }
       else
       {
@@ -93,13 +108,13 @@ void DO()
       }
       if (DOfaultstatus >= 15) // If Sensor does not respond 15 times then, publish error and break;
       {
-        do_heart = 0;                     //Sends out when DO Sensor Fails
+        doHeart = 0;                     //Sends out when DO Sensor Fails
         ets_printf("DO Sensor Failed\n"); // Reports error
         break;
       }
       else
       {
-        do_heart = 1;
+        doHeart = 1;
       }
     }
 
@@ -117,7 +132,7 @@ void DO()
 
     if (isnan(averagedomgl) != 0.00) // Checks Error Data Received
     {
-      do_heart = 0;
+      doHeart = 0;
     }
     else
     {
@@ -126,12 +141,14 @@ void DO()
   }
   else
   {
-    do_heart = 0;
+    doHeart = 0;
     Serial.println("DO Sensor Not Detected");
-    vTaskDelay(1000/portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 
+
+/* // Deprecated in 2021 versions
 void pH()
 {
   int ph_temp[13]; //pH sensor buffer
@@ -157,7 +174,7 @@ void pH()
 
     //resitance = hex16_signedint(ph_temp[9], ph_temp[10]);
     ph_heart = 1;
-    vTaskDelay(100/portTICK_PERIOD_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
   else
   {
@@ -165,3 +182,4 @@ void pH()
     Serial.println("pH Sensor Not Detected");
   }
 }
+*/

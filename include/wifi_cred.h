@@ -10,18 +10,16 @@ extern "C"
 }
 #include <AsyncMqttClient.h>
 
-#define ssid "GloryAgro"   //"AsmaulsRedmi" //  "Glory"                //         "GloryOffice"       //
-#define pass "Gloryart1!1" //"hackyou123"   //      // "razurahat@1!1"                                //
+#define ssid "GloryCTRL"   //"AsmaulsRedmi" //  "Glory"                //         "GloryOffice"       //
+#define pass "Gloryhabib1@1" //"hackyou123"   //      // "razurahat@1!1"                                //
 
 AsyncMqttClient mqttClient;
 TimerHandle_t mqttReconnectTimer;
 TimerHandle_t wifiReconnectTimer;
 
-//Static IP definitions
-/* 
-IPAddress local_IP(192, 168, 0, 17);
-IPAddress gateway(192, 168, 0, 1);
-IPAddress subnet(255, 255, 255, 0);
- */
+
+IPAddress local_IP(10, 0, 1, 20);
+IPAddress gateway(10, 0, 1, 1);
+IPAddress subnet(255, 255, 0, 0);
 
 #endif

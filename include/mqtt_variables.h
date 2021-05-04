@@ -1,17 +1,15 @@
 
-/* IP Reserved List
-TANK_1      192,168,0,14
-TANK_2      192,168,0,15
-TANK_3      192,168,0,16
-*/
 
-//Topic Declaration12
-char tank_addr[8] = "TANK_X"; //Insert TANK Address
+#define WIFI_SSID "GloryCTRL"
+#define WIFI_PASSWORD "Gloryhabib1@1"
 
-char HEARTBEAT_TOPIC[18];
-char DO_TOPIC[20];
-char pH_TOPIC[20];
+// Declare static IPs of device
+/*Note for Future, DHCP might be used in the future, a though a reporting database needs to be setup to keep track of the field devices*/
+IPAddress local_IP(10, 0, 1, 20);
+IPAddress gateway(10, 0, 1, 1);
+IPAddress subnet(255, 255, 0, 0);
 
-//MQTT
-#define MQTT_Broker_IP   "192.168.0.2" //<- Raspberry Broker "192.168.0.4" //<- AgroPC Broker    //"192.168.1.9" <- GloryOffice ////   "192.168.43.1"   // -< Redmi Broker
-#define MQTT_Fallback_IP "0.0.0.0"   //Implementation Required
+
+#define MQTT_HOST IPAddress(10, 0, 1, 2)
+#define MQTT_PORT 1883
+
