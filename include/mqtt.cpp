@@ -15,8 +15,8 @@ extern "C"
 char tankAddr[11] = "MQTT/TANK1"; //Insert TANK Address
 char HEART_TOPIC[20];
 char DO_TOPIC[20];
-char TEMP_TOPIC[20];
-
+char TEMPMID_TOPIC[20];
+char TEMPBOT_TOPIC[20];
 
 //Class Declaration
 AsyncMqttClient mqttClient;
@@ -25,13 +25,15 @@ TimerHandle_t wifiReconnectTimer;
 
 void mqtt_topic_declaration() // Stores Topics into variables
 {
-  strcat(HEART_TOPIC, tankAddr);
-  strcat(HEART_TOPIC, "/heart");
   strcat(DO_TOPIC, tankAddr);
-  strcat(DO_TOPIC, "/DO"); //TANK_x/DATA/LT105A  20 characters
-  strcat(TEMP_TOPIC, tankAddr);
-  strcat(TEMP_TOPIC, "/tempBot"); //TANK_x/DATA/LT105A  20 characters
-  
+  strcat(DO_TOPIC, "/DO"); //TANK_x/DATA/DO  20 characters
+  strcat(HEART_TOPIC, tankAddr);
+  strcat(HEART_TOPIC, "/heart"); //TANK_x/DATA/heart  20 characters
+  strcat(TEMPMID_TOPIC, tankAddr);
+  strcat(TEMPMID_TOPIC, "/tempMid"); //TANK_x/DATA/tempMid  20 characters
+  strcat(TEMPBOT_TOPIC, tankAddr);
+  strcat(TEMPBOT_TOPIC, "/tempBot"); //TANK_x/DATA/tempBot  20 characters
+
   // Deprecated from this 2021 version
   // strcat(pH_TOPIC, tank_addr);
   // strcat(pH_TOPIC, "/DATA/LT1729D"); //TANK_x/DATA/LT1729D  20 characters

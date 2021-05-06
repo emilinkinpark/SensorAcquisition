@@ -15,12 +15,15 @@
 *   
 */
 
-#include "mqtt.cpp"
+#include "mqtt.cpp" // Change Tank address here
 /* Change Wifi IP Addresses in mqtt_variables.h*/
 #include "OTA.h"
 #include "DOpH.cpp"
+#include "MAX31865.h"
 
 bool heart = 0;
+float midTemp = 0.00;
+uint8_t pt100Fault = 0;
 
 void setup()
 {
@@ -28,23 +31,29 @@ void setup()
   mqttInit(); // Initialising MQTT Parameters, check mqtt.h for more
   otaInit();  // Intialising OTA
   doInit();   // Intialises DO sensor
+  pt100Init(); // Initialises MAX31865 sensor
 }
 
 void loop()
 {
   publish(0, HEART_TOPIC);
 
+  //pt100;
+  midTemp = temperature();
+  pt100Fault = fault();
+
   DO(); // Starts DO measurements
 
   if (averagedomgl != 0.00)
   {
     publish(averagedomgl, DO_TOPIC); // Sends average DOmg/L Data to Broker
-    
+
   }
   publish(averagedomgl, DO_TOPIC);
-  publish(doTemp, TEMP_TOPIC);
+  publish(doTemp, TEMPBOT_TOPIC);
+  publish(midTemp, TEMPMID_TOPIC);
   publish(doHeart, HEART_TOPIC);
- 
+
   vTaskDelay(20000 / portTICK_PERIOD_MS); // delay is introduced to reduce bandwidth of the network
 
   otaLoop();

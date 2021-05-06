@@ -33,7 +33,7 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     float T = 273.15 + t; //Temperature in Kelvin
 
     /*Constants*/
-    float const S = 12.00;                       //Salinity Taken 12 as constant
+    float const S = 9.88;                        //Salinity in ppt
     float const atm_pressure = 101.325;          //Atmospheric Pressure in kPa
     float const water_depth = 1.60;              // Unit of height: m;
     float const rho_saltwater = 1023.6;          //Unit of Density: kg/m^3
