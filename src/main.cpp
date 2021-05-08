@@ -25,12 +25,18 @@ bool heart = 0;
 float midTemp = 0.00;
 uint8_t pt100Fault = 0;
 
+Smoothed<float> AveragetempMid;
+float averagetempMid = 0.00;
+
 void setup()
 {
   Serial.begin(9600);
   mqttInit(); // Initialising MQTT Parameters, check mqtt.h for more
   otaInit();  // Intialising OTA
   doInit();   // Intialises DO sensor
+
+  AveragetempMid.begin(SMOOTHED_AVERAGE, 6); //Initialising Average class
+
   pt100Init(); // Initialises MAX31865 sensor
 }
 
@@ -41,18 +47,19 @@ void loop()
   //pt100;
   midTemp = temperature();
   pt100Fault = fault();
+  AveragetempMid.add(midTemp);
+  averagetempMid = AveragetempMid.get();      // Averaging Mid Temp 
 
   DO(); // Starts DO measurements
 
   if (averagedomgl != 0.00)
   {
     publish(averagedomgl, DO_TOPIC); // Sends average DOmg/L Data to Broker
-
   }
-  publish(averagedomgl, DO_TOPIC);
-  publish(doTemp, TEMPBOT_TOPIC);
-  publish(midTemp, TEMPMID_TOPIC);
-  publish(doHeart, HEART_TOPIC);
+  publish(averagedomgl, DO_TOPIC);        // Send DO data
+  publish(doTemp, TEMPBOT_TOPIC);         // Send Bottom Temp data
+  publish(averagetempMid, TEMPMID_TOPIC); // Send Mid Temp data
+  publish(doHeart, HEART_TOPIC);          // Send Heartbeat
 
   vTaskDelay(20000 / portTICK_PERIOD_MS); // delay is introduced to reduce bandwidth of the network
 

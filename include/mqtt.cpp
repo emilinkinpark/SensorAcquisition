@@ -12,7 +12,7 @@ extern "C"
 #include "mqtt_variables.h"
 
 //Topic Declaration
-char tankAddr[11] = "MQTT/TANK1"; //Insert TANK Address
+char tankAddr[11] = tankADDR;//"MQTT/TANK1"; //Insert TANK Address
 char HEART_TOPIC[20];
 char DO_TOPIC[20];
 char TEMPMID_TOPIC[20];

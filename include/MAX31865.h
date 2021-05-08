@@ -24,7 +24,7 @@ float temperature()
 {
     //uint16_t rtd = thermo.readRTD();
     float temp = thermo.temperature(RNOMINAL, RREF);
-    //Serial.print("Temp  erature : "); Serial.println(midTemp);
+    //Serial.print("Temperature : "); Serial.println(midTemp);
     //Serial.print("Fault : "); Serial.println(pt100Fault);
     return temp;
 }
