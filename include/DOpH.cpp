@@ -83,8 +83,15 @@ void DO()
       //Serial.println("Data Acquired");
 
       doTemp = floatTOdecimal(o2[3], o2[4], o2[5], o2[6]);
-      //float Temp_Manipulation = Conv_Temp * 100;
-      //Temp_Send = Temp_Manipulation;
+
+      if(doTemp == 0.00)          // Safety measure for keeping DO sensor internal temperature sensor from not working
+      {
+        doTemp = 25.00;
+      }
+      else
+      {
+        //nothing
+      }
 
       float Conv_DOPerc = floatTOdecimal(o2[7], o2[8], o2[9], o2[10]);
       memset(o2, 0, sizeof(o2)); //Empties array

@@ -11,7 +11,7 @@
 *   The field slave devices talks back to ESP32 (Master) over RS485 Modbus.
 *   The data is taken in and send to MQTT Broker over Wifi
 *   
-*   Dedicated to Tyler Goodwin, the mate that influenced me to join the software side;
+*   Dedicated to Tyler Goodwin, the mate who influenced me to join the software side;
 *   
 */
 
