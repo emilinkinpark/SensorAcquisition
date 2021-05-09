@@ -1,5 +1,8 @@
 #include <math.h>
 
+#define salinity 8.75 
+
+
 float floatTOdecimal(long int byte0, long int byte1, long int byte2, long int byte3) //Floating point Number in Little-endian to decimal conversion
 {
     long int realbyte0, realbyte1, realbyte2, realbyte3;
@@ -33,7 +36,7 @@ float domglcalc(float t, float DOperc) //Temp in deg C, DOperc in %
     float T = 273.15 + t; //Temperature in Kelvin
 
     /*Constants*/
-    float const S = 8.50;                        //Salinity in ppt
+    float const S = salinity;                        //Salinity in ppt
     float const atm_pressure = 101.325;          //Atmospheric Pressure in kPa
     float const water_depth = 1.60;              // Unit of height: m;
     float const rho_saltwater = 1023.6;          //Unit of Density: kg/m^3

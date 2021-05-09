@@ -15,8 +15,8 @@
 *   
 */
 
-#include "mqtt.cpp" // Change Tank address here
-/* Change Wifi IP Addresses in mqtt_variables.h*/
+/*Check mqtt_variables.h for more instructions before updating firmware*/
+#include "mqtt.cpp" 
 #include "OTA.h"
 #include "DOpH.cpp"
 #include "MAX31865.h"
